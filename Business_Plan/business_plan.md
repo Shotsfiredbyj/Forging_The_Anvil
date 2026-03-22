@@ -27,7 +27,10 @@ Cold Anvil (coldanvil.com / coldanvil.ai) — product engineering in a box. User
 ### Tiers
 
 **Free — "Try it"**  
-1 idea, full pipeline, email-gated delivery
+- 1 idea from raw pitch to polished vision document
+- Full quality process applied (review + rewrite if needed)
+- Verify email to receive the output
+- **What you can't do:** turn ideas into products, refine outputs
 
 **29 dollars/month — "Got an idea"**  
 - 2 ideas per month
