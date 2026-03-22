@@ -130,6 +130,86 @@ GCP and AWS are 2-3x the cost of specialist providers for the same
 cards. The premium buys managed infrastructure, IAM, networking — none
 of which Cold Anvil needs given the Gateway already handles orchestration.
 
+## Cascade Timing
+
+Benchmark: a full cascade on a single Pro 6000 took ~45 minutes.
+B200 is ~4-5x faster per GPU.
+
+**Single cascade, no contention (2x B200):**
+
+| Phase | Pro 6000 (est) | 2x B200 (est) |
+|-------|---------------|---------------|
+| Generation (35B, ~8 tasks) | ~15 min | ~3 min |
+| Dual review | ~10 min | ~2 min |
+| Rewrite (122B, failed tasks) | ~12 min | ~3 min |
+| Re-review | ~8 min | ~2 min |
+| **Total compute** | **~45 min** | **~10 min** |
+
+This is compute time only — excludes the user's conversational Q&A
+time which is separate and user-paced.
+
+## Contention at 50 Users
+
+**Important:** All users need GPU time, all the time. The agentic
+conversation (Annie refining the idea with the user) runs inference on
+the same GPU fleet. There is no "idle" phase — Q&A users are running
+the 35B model while other users are in generation/review/rewrite.
+
+50 concurrent users means 50 concurrent inference requests across
+2 cards, competing for throughput:
+
+- ~15 in agentic Q&A (35B, lighter but continuous)
+- ~15 in generation (35B, parallel tasks)
+- ~10 in review (27B, dual independent)
+- ~10 in rewrite (122B, heaviest)
+
+Realistic per-user compute time under 50-user load: **15-20 minutes**
+(up from 10 uncontested). The 122B rewrite tasks create the most
+contention — a rewrite hogging a card while 15 people are trying to
+have a conversation.
+
+## Unit Economics at 50 Users (2x B200, Packet.ai)
+
+**At 29/month (lowest tier):**
+
+| | 8hrs/day | 12hrs/day | 16hrs/day |
+|--|---------|-----------|-----------|
+| GPU cost | 1,080/mo | 1,620/mo | 2,160/mo |
+| Platform hosting | 200/mo | 200/mo | 200/mo |
+| Payment processing (3%) | 43/mo | 43/mo | 43/mo |
+| Domain, support, misc | 100/mo | 100/mo | 100/mo |
+| **Total cost** | **1,423/mo** | **1,963/mo** | **2,503/mo** |
+| Revenue (50 x 29) | 1,450/mo | 1,450/mo | 1,450/mo |
+| **Profit** | **27/mo** | **-513/mo** | **-1,053/mo** |
+
+The 29/month tier barely breaks even at 8hrs/day and loses money at
+any higher utilisation. It's a loss leader at best.
+
+**At 49/month (solo founder tier):**
+
+| | 8hrs/day | 12hrs/day | 16hrs/day |
+|--|---------|-----------|-----------|
+| GPU cost | 1,080/mo | 1,620/mo | 2,160/mo |
+| Platform hosting | 200/mo | 200/mo | 200/mo |
+| Payment processing (3%) | 74/mo | 74/mo | 74/mo |
+| Domain, support, misc | 100/mo | 100/mo | 100/mo |
+| **Total cost** | **1,454/mo** | **1,994/mo** | **2,534/mo** |
+| Revenue (50 x 49) | 2,450/mo | 2,450/mo | 2,450/mo |
+| **Profit** | **996/mo** | **456/mo** | **-84/mo** |
+
+At 49/month the business works at 8-12hrs/day but goes underwater at
+16hrs. If users are spread across timezones, GPU hours stretch and
+margins compress.
+
+**Implications:**
+
+- The 29/month tier cannot sustain the business at 50 users. It only
+  works as a conversion funnel to the 49/month tier.
+- At 49/month, regional focus matters. Pick one timezone at launch,
+  keep GPU hours tight (8-12hrs/day), scale from there.
+- Alternatively, a higher price point (69 or 79/month) gives real
+  margin even at 16hrs/day.
+
 ## Recommendation
 
 **Start with 2x B200 rented.** Cheapest monthly cost at low utilisation
