@@ -24,6 +24,14 @@ product specs, and the Cold_Anvil codebase.
 **Important:** `Cold_Anvil/` is its own git repo. Commits and pushes there are
 separate from the parent `Forging_The_Anvil` repo.
 
+## Memory
+
+Use Arnor memory (MCP tool `mcp__arnor-memory__memory_write`) for important
+decisions, insights, and project state — not just local Claude memory files.
+Arnor memory is shared across the whole fleet. Use it for anything that
+another agent working on this project (or a related project) would benefit
+from knowing.
+
 ## How We Work
 
 - Design first. Specs before code. Research before specs.

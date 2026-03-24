@@ -240,6 +240,43 @@ enforced by the machine.
 
 That's the box. That's the team.
 
+### The Longer Vision — A Dream Building Machine
+
+The idea-to-output pipeline is the hook, not the product.
+
+If Cold Anvil only turns ideas into output, it's a one-shot tool. Customer
+arrives, cascade runs, output lands, customer leaves. That's a one-time
+purchase wearing a subscription's clothes. The real product is what comes
+after the first cascade.
+
+Cold Anvil is a platform for people to keep building. Not just make something
+once, but evolve it — add features, iterate on quality, grow the project over
+time. A purpose-built dream building machine.
+
+The moat isn't generation. Any AI tool can generate code. The moat is
+accumulated context. Cold Anvil knows your project: your codebase, your quality
+bar, your tech choices, your brand voice, what's been built, what worked, what
+didn't. The longer you use it, the better it gets at building your thing. Not
+because of lock-in tricks, but because the platform genuinely compounds value
+over time.
+
+This means the architecture must support:
+
+- **Codebase awareness** — the pipeline sees what's already built (via RAG,
+  platform-hosted code, or CLI integration) before generating more
+- **Incremental cascades** — "add a feature to my existing app" not just
+  "build me an app from scratch"
+- **Project memory** — the platform remembers what it built, what the customer
+  changed, and builds on that foundation
+- **Developer integration** — a CLI or IDE tool that works with the user's
+  local environment, not just a web UI
+
+Phase 3 builds the forge — idea to output works. Later phases build the
+workshop — projects live here, evolve here, grow here. Long-term, Cold Anvil
+becomes the foundry: the place where dreams get made, iterated, and shipped,
+with a platform that remembers everything and gets smarter about your work
+over time.
+
 ## Cold Anvil as the Engine Behind The Fourth Age
 
 The Fourth Age (fourthage.ai) is an AI creative partner for content creators —
