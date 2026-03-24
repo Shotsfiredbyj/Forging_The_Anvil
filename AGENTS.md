@@ -23,6 +23,21 @@ Cold_Anvil codebase.
 - `Business_Plan/` — Business model, financials, strategy, pricing
 - `Product_Specs/` — Feature specs, user journeys, requirements
 
+## Forge Operations
+
+Before running any forge batch, cascade, or benchmark, read and follow:
+`FORGE-OPERATIONS.md` (in this repo)
+
+Key rules:
+- One batch/cascade at a time. Never launch two in the same message.
+- Sequential means wait. Don't submit until the previous run completes.
+- Cancel via Gateway API, never pkill. The CLI is a poller — the Gateway
+  owns the work. `curl -X POST http://elostirion:8400/forge/cancel-all`
+- Cold Anvil runs are hidden by default on the dashboard. Always use
+  `?project=cold_anvil` when checking active runs:
+  `curl -s "http://elostirion:8400/dashboard/api/forge?project=cold_anvil"`
+- Check for active runs before every submission. No exceptions.
+
 ## How We Work
 
 - Design first. Specs before code. Research before specs.
