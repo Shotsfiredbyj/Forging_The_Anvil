@@ -27,7 +27,10 @@ def _request(url: str, *, method: str = "GET", data: dict | None = None,
              api_key: str = "", timeout: int = 30) -> tuple[int, dict]:
     """Send an HTTP request to RunPod API. Returns (status_code, parsed_json)."""
     body = json.dumps(data).encode() if data else None
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "coldanvil-bench/1.0",
+    }
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 

@@ -22,11 +22,11 @@ from pathlib import Path
 # Ensure package imports work when run as __main__
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import config as cfg
-import infra
-import manifest
-from compare import main as compare_main
-from harness import main as harness_main
+import config as cfg  # noqa: E402
+import infra  # noqa: E402
+import manifest  # noqa: E402
+from compare import main as compare_main  # noqa: E402
+from harness import main as harness_main  # noqa: E402
 
 log = logging.getLogger("runpod_bench")
 
@@ -74,7 +74,10 @@ def cmd_setup(args):
             print("Aborted.")
             return
 
-    fleet = infra.deploy_fleet(deployments, api_key)
+    hf_token = os.environ.get("HF_TOKEN", "")
+    if not hf_token:
+        print("Warning: HF_TOKEN not set. Gated models (Gemma) will fail to load.")
+    fleet = infra.deploy_fleet(deployments, api_key, hf_token=hf_token)
     fleet.save(str(FLEET_STATE_PATH))
 
     print(f"\nDeployed {len(fleet.endpoints)} endpoints.")

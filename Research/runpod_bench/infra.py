@@ -41,7 +41,10 @@ def _request(url: str, *, method: str = "GET", data: dict | None = None,
              api_key: str = "", timeout: int = 30) -> tuple[int, dict]:
     """Send an HTTP request. Returns (status_code, parsed_json)."""
     body = json.dumps(data).encode() if data else None
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "coldanvil-bench/1.0",
+    }
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 
@@ -132,7 +135,8 @@ class Fleet:
 # Template management
 # ---------------------------------------------------------------------------
 
-def create_template(deployment: ModelDeployment, api_key: str) -> str:
+def create_template(deployment: ModelDeployment, api_key: str,
+                    hf_token: str = "") -> str:
     """Create a RunPod template for a model deployment.
 
     Returns the template ID.
@@ -142,7 +146,7 @@ def create_template(deployment: ModelDeployment, api_key: str) -> str:
         "imageName": VLLM_IMAGE,
         "category": "NVIDIA",
         "containerDiskInGb": 20,
-        "env": deployment.vllm_env(),
+        "env": deployment.vllm_env(hf_token=hf_token),
         "volumeInGb": 0,
         "volumeMountPath": "/runpod-volume",
     }
@@ -366,7 +370,7 @@ def get_gpu_availability(api_key: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def deploy_fleet(deployments: list[ModelDeployment],
-                 api_key: str) -> Fleet:
+                 api_key: str, hf_token: str = "") -> Fleet:
     """Deploy a full fleet of model endpoints.
 
     Creates templates and endpoints for each deployment in the manifest.
@@ -376,7 +380,7 @@ def deploy_fleet(deployments: list[ModelDeployment],
 
     for dep in deployments:
         try:
-            template_id = create_template(dep, api_key)
+            template_id = create_template(dep, api_key, hf_token=hf_token)
             endpoint_id = create_endpoint(dep, template_id, api_key)
 
             fleet.endpoints[dep.key] = DeployedEndpoint(
