@@ -1,9 +1,10 @@
 # Cold Anvil — User Journey Spec
 
 **Written:** 23 March 2026
-**Status:** Draft — Phase 3A
-**Depends on:** Cascade depth pricing (decided), conversational flow spec (TBD),
-API contract (TBD)
+**Updated:** 24 March 2026
+**Status:** Reviewed — open questions resolved
+**Depends on:** Cascade depth pricing (decided), conversational flow spec
+(reviewed), API contract (reviewed)
 
 ---
 
@@ -95,7 +96,7 @@ to parse the idea and prepare the conversation.
 
 **State:** Anonymous user, in conversation with Annie.
 
-- Annie asks 5 clarifying questions (see conversational flow spec — TBD).
+- Annie asks 5 clarifying questions (see conversational flow spec).
 - Questions are not generic. They're derived from what the user said and
   what's missing. If the user gave a detailed pitch, Annie asks fewer,
   sharper questions. If it's vague, she asks broader ones.
@@ -140,7 +141,7 @@ and the platform captures the structure behind it.
   to your email. Verify to save your project and get a shareable link."
   We already have the email from intake — this is just verification, not
   a new ask. One small step, not a wall.
-- Without verification: page lives for 24 hours. With verification:
+- Without verification: page lives for 14 days. With verification:
   permanent, shareable, and the user has an account for future visits.
 
 **Why gate persistence, not viewing:** The user needs to see the quality
@@ -153,10 +154,11 @@ they've seen the value, now we're offering to keep it for them.
 **State:** Vision doc delivered. Email captured. Free tier complete.
 
 - Below the vision doc on the project page: the roadmap section.
-- Not empty. Not a placeholder. The pipeline has already generated a roadmap
-  preview — enough to see it's real, specific to this project, and valuable.
-- Presented behind a tasteful blur or greyed out. Enough visible to read
-  a heading or two, see the structure, know it's not a template.
+- Not empty. Not a placeholder. Shows structure and metadata derived from the
+  vision doc — section headings, topic areas, scope indicators. Enough to
+  see what the roadmap *would* cover, without generating the actual content.
+- No speculative generation. We don't burn compute on the hope they upgrade.
+  The preview communicates depth and specificity without a pipeline run.
 - CTA: "Unlock your roadmap — Shape It for 29/month"
 - Secondary: "See what all tiers include" — link to pricing page.
 
@@ -204,7 +206,7 @@ the architecture alone.
 **State:** Paying customer. Tier 2.
 
 - Step 6: Rubric creation conversation — "What does good mean for your
-  project?" (see conversational flow spec — TBD). This generates project-
+  project?" (see conversational flow spec). This generates project-
   specific rubrics that layer on top of base rubrics.
 - Tech design generated through pipeline with project rubrics applied.
 - Code generation: multiple files, each quality-gated and reviewed.
@@ -259,8 +261,8 @@ Tech Design + Code + Assembly + Verification + Deployment Guide.
 
 | Boundary | What's teased | Conversion trigger |
 |----------|--------------|-------------------|
-| Free -> Tier 1 | Roadmap preview (real, project-specific, blurred) | "I can see my roadmap. I want it." |
-| Tier 1 -> Tier 2 | Tech design preview | "I can see the architecture. I need it." |
+| Free -> Tier 1 | Roadmap structure preview (metadata, not generated content) | "I can see what my roadmap would cover. I want it." |
+| Tier 1 -> Tier 2 | Tech design structure preview (metadata, not generated content) | "I can see the architecture scope. I need it." |
 | Tier 2 -> Tier 3 | Deployment readiness assessment | "I have code but deploying is hard. They'll do it for me." |
 
 ---
@@ -322,32 +324,30 @@ upgrade. Never two asks at once.
 
 ---
 
-## Open Design Questions
+## Design Decisions (resolved 24 March 2026)
 
-- **Speculative generation:** Do we run the next tier's pipeline speculatively
-  to populate the previews? Cost is low per user, but scales with free tier
-  traffic. Alternative: show structure/metadata without content.
-- **Share permissions:** Can shared links show locked tier content (blurred)?
-  This would make every share a Tier N+1 ad. But it also shows content the
-  sharer hasn't paid for.
-- **Project expiry (free tier):** How long does a non-email-verified project
-  page live? Session-only is aggressive. 7 days is generous. 24 hours is
-  probably right.
-- **Tier downgrade:** What happens if a Tier 3 customer downgrades to Tier 2?
-  Do they lose access to assembly/verification/deployment? Or is it generated
-  once, kept forever, but no new iterations at that depth?
+- **Speculative generation:** No. Tier previews show structure and metadata
+  derived from existing outputs, not pre-generated content. Don't burn
+  compute on the hope of conversion.
+- **Share permissions:** No. Shared links only show content the sharer has
+  access to. Locked tiers are not visible (blurred or otherwise).
+- **Project expiry (free tier):** 14 days for non-verified projects. Low
+  storage cost, gives users time to come back.
+- **Tier downgrade:** Keep everything that was generated. Customer retains
+  read access to all previously generated content but cannot iterate at
+  the deeper depth until they re-upgrade.
 
 ---
 
 ## Dependencies
 
-- **Conversational flow spec** (3A, TBD) — Step 3 and Step 6 conversation
+- **Conversational flow spec** (3A, reviewed) — Step 3 and Step 6 conversation
   design
-- **API contract** (3A, TBD) — endpoint shapes for project creation, cascade
+- **API contract** (3A, reviewed) — endpoint shapes for project creation, cascade
   triggering, output retrieval
 - **Frontend design** — project page rendering, tier boundary UI, share
   mechanics. Not specced here — this is the journey, not the interface.
 
 ---
 
-*Draft spec. Review and refine before implementation begins.*
+*Reviewed 24 March 2026. Open questions resolved. Ready for implementation.*

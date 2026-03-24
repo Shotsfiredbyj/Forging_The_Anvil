@@ -1,9 +1,10 @@
 # Cold Anvil — Conversational Flow Spec
 
 **Written:** 23 March 2026
-**Status:** Draft — Phase 3A
-**Depends on:** User journey spec (draft complete), idea-to-vision research
-(complete), API contract (TBD)
+**Updated:** 24 March 2026
+**Status:** Reviewed — open questions resolved
+**Depends on:** User journey spec (reviewed), idea-to-vision research
+(complete), API contract (reviewed)
 **Research basis:** Research/idea-to-vision-frameworks.md
 
 ---
@@ -485,45 +486,47 @@ the user's words.
 
 ---
 
-## Part 3: Open Questions
+## Part 3: Design Decisions (resolved 24 March 2026)
 
 ### Experience
 
-- **Progress panel interaction model.** Can the user click to edit
-  extracted fields directly? Or only through conversation? Direct edit
-  is faster but breaks the conversational metaphor. Conversation-only
-  is more natural but slower to correct mistakes.
-- **Multiple ideas.** What if the user describes two ideas in one
-  session? Does Annie ask them to pick one? Does the system support
-  forking?
-- **Returning to refinement.** After the vision doc is generated, can
-  the user come back to the Step 3 conversation and refine? Or is it
-  a one-shot?
-- **Step 6 timing.** Does rubric creation happen before tech design
-  starts, or can it happen in parallel with the user reviewing content
-  output?
+- **Progress panel interaction:** Conversation only. No direct field
+  editing. The conversational metaphor is the product — if users can
+  click-edit fields, the conversation becomes a form with extra steps.
+- **Multiple ideas:** MVP guides users to pick one. Annie explains why
+  focus matters and mentions that multi-project workflows are on the
+  roadmap. No forking in V1.
+- **Returning to refinement:** Not until the user upgrades to Tier 1+.
+  Free tier is a one-shot: conversation -> vision doc -> done. Paid
+  users can revisit and refine.
+- **Step 6 timing:** Sequential. Rubric creation requires user input
+  and must complete before tech design starts, because the rubrics
+  feed into pipeline evaluation from that point on.
 
 ### Technical
 
-- **Extraction model selection.** Same model as conversation, or a
-  smaller/different model? Smaller is cheaper but may miss nuance.
-  Same model is more expensive but consistent. Needs testing.
-- **Summarisation quality.** How good is the phase summarisation? If
-  it drops important nuance, later phases suffer. Needs testing with
-  real conversations.
-- **Conversation model vs chat endpoint.** Does Step 3 use the Gateway
-  chat endpoint or a dedicated conversation endpoint? Gateway chat
-  exists but wasn't designed for managed multi-phase flows with
-  external state.
-- **Schema versioning.** If we change the extraction schema, what
-  happens to in-progress conversations? Need a version field.
-- **Concurrency.** At 50 users, how many concurrent Step 3
-  conversations? Each holds a conversation model loaded. Impact on
-  GPU fleet?
-- **Latency per turn.** The extraction + state management + context
-  assembly + conversation generation pipeline adds latency. Target:
-  under 3 seconds per Annie response. Is that achievable with two
-  model calls per turn?
+- **Extraction model selection:** Start with a smaller instruction-tuned
+  model (Mistral Small 3.2 24B or Gemma3 27B). Cheaper, and extraction
+  is a structured task that doesn't need a large model's breadth. Needs
+  efficacy testing before launch.
+- **Summarisation quality:** Needs testing with real conversations.
+  Deferred to implementation phase.
+- **Conversation endpoint:** Dedicated endpoint in Cold Anvil API, not
+  the Gateway chat endpoint. Cold Anvil owns conversation state,
+  extraction, phase transitions, and context assembly. Gateway is called
+  for raw completions only. Clean separation: Gateway = compute,
+  Cold Anvil = product.
+- **Schema versioning:** Every project's extraction state is stamped
+  with a schema version from day one. When the schema changes, old
+  projects either migrate (field mapping) or finish on their original
+  schema version. Simple version field on the project record.
+- **Concurrency:** Sub-40B models for both conversation and extraction
+  should allow high concurrency on the B200 fleet. Exact capacity needs
+  testing. Prior analysis suggests ~35 concurrent GPU tasks with
+  staggered phases.
+- **Latency per turn:** Target remains under 3 seconds for two model
+  calls per turn. Only testing will confirm. If extraction model is
+  fast enough (small model, structured output), this is achievable.
 
 ---
 
@@ -543,6 +546,6 @@ the user's words.
 
 ---
 
-*Draft spec. Review before implementation. Technical architecture
+*Reviewed 24 March 2026. Open questions resolved. Technical architecture
 needs validation against actual model performance (context management,
-extraction accuracy, latency).*
+extraction accuracy, latency) during implementation.*

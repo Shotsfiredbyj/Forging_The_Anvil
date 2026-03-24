@@ -1,7 +1,8 @@
 # Cold Anvil — API Contract
 
 **Written:** 23 March 2026
-**Status:** Draft — Phase 3A
+**Updated:** 24 March 2026
+**Status:** Reviewed — open questions resolved
 **Depends on:** User journey spec, conversational flow spec
 **Built by:** 3B (Core API), 3C (Batch Variable Injection), 3D (Conversational
 Flows), 3F (Auth + Billing)
@@ -641,7 +642,9 @@ Consistent error format across all endpoints.
 request/response validation.
 
 **State storage:** Project records, extraction state, conversation
-history (summarised), outputs. Database TBD (Postgres likely).
+history (summarised), outputs. **Database: Postgres.** Relational data
+(projects, users, tiers), JSONB for extraction state and conversation
+summaries, transactional guarantees for state updates.
 
 **Gateway integration:** The cascade endpoints proxy to the Arnor
 Gateway for actual pipeline execution. Cold Anvil API is the product
@@ -665,10 +668,11 @@ Conversation history (summarised) is stored in the project record.
   implementation of the conversational flow spec)
 - Gateway API changes needed to support Cold Anvil (separate spec)
 - Stripe webhook handling details (Layer 5)
-- Add-on project billing (TBD)
-- Share link privacy controls (TBD)
+- Add-on project billing (deferred to later phase)
+- Share link privacy controls (decided: shared links show only unlocked content)
 
 ---
 
-*Draft contract. Refine during 3B implementation. Breaking changes
-are fine at this stage — this is a target, not a commitment.*
+*Reviewed 24 March 2026. Open questions resolved. Refine during 3B
+implementation. Breaking changes are fine at this stage — this is a
+target, not a commitment.*
