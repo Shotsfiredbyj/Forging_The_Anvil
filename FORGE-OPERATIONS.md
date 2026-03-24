@@ -131,26 +131,45 @@ Cold Anvil has its own cascade orchestrator that handles multi-stage
 sequencing automatically. The CLI submits each stage to the Gateway,
 polls until done, then feeds outputs into the next stage.
 
-**To run:**
+**Critical: the CLI is the cascade orchestrator.** The Gateway only
+runs individual batches — it has no concept of multi-stage cascades.
+The CLI is the process that feeds outputs from stage N into stage N+1.
+If the CLI dies, the current stage finishes on the Gateway but all
+remaining stages never run. The cascade is abandoned mid-way.
+
+#### Running from Claude Code
+
+Claude Code's bash tool has a **maximum timeout of 600 seconds (10
+minutes)**. A full cascade takes 10–40+ minutes. If you use
+`run_in_background=true`, the bash tool will kill the CLI after 600s,
+which kills the cascade mid-way — the current Gateway stage finishes
+but remaining stages never fire.
+
+**Use `nohup` to detach the cascade from the bash session:**
 ```bash
 cd /home/jack/Forging_The_Anvil/Cold_Anvil && \
-  python -m pipeline.cli cascade website_full 2>&1 | tee /tmp/cascade.log
+  nohup python -m pipeline.cli cascade website_full \
+  > /tmp/cascade.log 2>&1 &
+echo "PID: $!"
 ```
-Use `run_in_background=true` (these take 10-30+ minutes). Only ONE
-cascade at a time. Never launch two in the same message.
+This lets the cascade run to completion regardless of Claude Code's
+bash timeout. The PID is printed so you can check on it later.
 
-Optional flags:
-- `--routing-profile sub40b` — override model routing
-- `--dry-run` — validate without submitting
-
-**To monitor progress:**
+**Then monitor via the Gateway API, not the process:**
 ```bash
-# MUST use ?project=cold_anvil — the default dashboard hides Cold Anvil runs
+# Check if the cascade CLI is still alive
+ps -p <PID> -o pid,etime,cmd --no-headers
+
+# Check active runs on the Gateway (MUST use ?project=cold_anvil)
 curl -s "http://elostirion:8400/dashboard/api/forge?project=cold_anvil" | python3 -c "
 import sys,json; d=json.load(sys.stdin)
+print(f'Active: {len(d[\"active\"])}')
 for r in d['active']:
-    print(f'{r[\"run_id\"]}  status={r[\"status\"]}  passed={r[\"tasks_passed\"]}/{r[\"task_count\"]}')
+    print(f'  {r[\"run_id\"]}  status={r[\"status\"]}  stage={r.get(\"cascade_stage_name\",\"?\")}  tasks={r[\"task_count\"]}')
 "
+
+# Check the cascade event log for stage progression
+tail -5 /tmp/cascade.log
 ```
 
 **To check local run history:**
@@ -158,15 +177,32 @@ for r in d['active']:
 cd /home/jack/Forging_The_Anvil/Cold_Anvil && python -m pipeline.cli runs
 ```
 
-### What NOT to do with cascades
+Optional flags:
+- `--routing-profile sub40b` — override model routing
+- `--dry-run` — validate without submitting
+
+#### What NOT to do with cascades
 
 - Don't launch two cascades in the same message — ever
+- Don't use `run_in_background=true` without `nohup` — the 600s bash
+  timeout will kill the CLI and abandon the cascade mid-way
 - Don't pipe through `head` (kills the process after N lines)
 - Don't use `pkill` or `kill -9` to cancel (orphans Gateway runs)
-- Don't run foreground with default 120s timeout (cascade outlasts it)
 - Don't submit without checking for active runs first
 - Don't assume `dashboard/api/forge` shows Cold Anvil runs — it doesn't
   without `?project=cold_anvil`
+
+#### What NOT to "fix"
+
+The polling code in `gateway_client.py` works correctly:
+- `POLL_TIMEOUT = 1800` (30 minutes) — plenty of headroom
+- `POLL_INTERVAL = 5` — polls every 5 seconds
+- `_request` timeout of 30s is per HTTP call, not the poll loop
+
+If a cascade stops mid-way, the problem is almost certainly that
+**the CLI process was killed** (bash timeout, pkill, session ended),
+not a bug in the polling code. Check the process first, don't
+"fix" working code based on a misdiagnosis.
 
 ---
 
