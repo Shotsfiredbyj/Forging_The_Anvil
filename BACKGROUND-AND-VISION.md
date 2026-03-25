@@ -277,6 +277,10 @@ becomes the foundry: the place where dreams get made, iterated, and shipped,
 with a platform that remembers everything and gets smarter about your work
 over time.
 
+For the agentic architecture — how Annie evolves from a single conversation
+step to an always-on partner backed by specialist agents, with graduated
+autonomy and goal-backward verification — see [AGENTIC-VISION.md](AGENTIC-VISION.md).
+
 ## Cold Anvil as the Engine Behind The Fourth Age
 
 The Fourth Age (fourthage.ai) is an AI creative partner for content creators —

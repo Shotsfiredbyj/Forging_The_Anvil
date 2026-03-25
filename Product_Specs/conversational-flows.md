@@ -11,9 +11,12 @@
 
 ## Overview
 
-Two conversations in the product. Both are guided extractions disguised as
+Two conversations in the MVP. Both are guided extractions disguised as
 natural conversations. Both must feel like working with a sharp product
 thinker, not filling out a form.
+
+**Future scope:** The agentic vision expands Annie's conversational presence
+beyond these two touchpoints — see [AGENTIC-VISION.md](../AGENTIC-VISION.md).
 
 - **Step 3: Idea Refinement** — Free tier. Turns a raw idea into structured
   project context. Feeds the vision document generation.
