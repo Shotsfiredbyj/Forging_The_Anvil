@@ -77,14 +77,22 @@ class ModelDeployment:
 _L40S = dict(gpu_id="NVIDIA L40S", gpu_tier="l40s", vram_gb=48, cost_per_sec=0.00053)
 _B200 = dict(gpu_id="NVIDIA B200", gpu_tier="b200", vram_gb=180, cost_per_sec=0.00240)
 
-# All models run at FP8 (vLLM's Q8 equivalent) for consistent benchmarking.
-# FP8 sizing: param_count * 1 byte. 35B MoE = ~35GB, 122B MoE = ~122GB,
-# 20B = ~20GB, 120B = ~120GB, 24B = ~24GB, 27B = ~27GB.
+# Precision strategy:
+#   - Generation/rewrite (Qwen3.5): FP16 on B200 (room to spare), FP8 on L40S (48GB limit)
+#   - Code generation (GPT-OSS): MXFP4 — only available precision
+#   - Review (Mistral, Gemma): FP8 — reliable scoring, doesn't need max quality
+#
+# Sizing: FP16 = 2 bytes/param, FP8 = 1 byte/param, MXFP4 = 0.5 bytes/param.
+#
+# Single B200 stack (192GB): Qwen 35B FP16 (~70GB) + GPT-OSS 20B MXFP4 (~10GB)
+#   + Mistral 24B FP8 (~24GB) + Gemma 27B FP8 (~27GB) = ~131GB with room for KV cache.
+# The 122B models at FP8 (~122GB) need their own B200.
 
 FLEET: list[ModelDeployment] = [
 
     # --- Creative generation ---
     # Qwen3.5-35B-A3B: MoE (35B total, 3B active). ~35GB at FP8 → fits L40S.
+    # FP16 (~70GB) won't fit L40S (48GB), so L40S stays FP8. B200 runs FP16.
     ModelDeployment(
         key="gen_creative_l40s", name="Qwen3.5 35B-A3B FP8 (L40S)",
         role="generate_creative",
@@ -92,7 +100,7 @@ FLEET: list[ModelDeployment] = [
         max_model_len=32768, quantization="fp8",
         **_L40S,
     ),
-    # Qwen3.5-122B-A10B: MoE (122B total, 10B active). ~122GB at FP8 → needs B200.
+    # Qwen3.5-122B-A10B: MoE (122B total, 10B active). ~122GB at FP8 → fits B200.
     ModelDeployment(
         key="gen_creative_b200", name="Qwen3.5 122B-A10B FP8 (B200)",
         role="generate_creative",
@@ -102,20 +110,20 @@ FLEET: list[ModelDeployment] = [
     ),
 
     # --- Code generation ---
-    # GPT-OSS 20B: ~20GB at FP8 → fits L40S easily.
+    # GPT-OSS 20B: only available as MXFP4. ~10GB → fits L40S easily.
     ModelDeployment(
-        key="gen_code_l40s", name="GPT-OSS 20B FP8 (L40S)",
+        key="gen_code_l40s", name="GPT-OSS 20B MXFP4 (L40S)",
         role="generate_code",
         hf_model_id="openai/gpt-oss-20b", local_equivalent="gpt-oss:20b",
-        max_model_len=32768, quantization="fp8",
+        max_model_len=32768,
         **_L40S,
     ),
-    # GPT-OSS 120B: ~120GB at FP8 → needs B200.
+    # GPT-OSS 120B: only available as MXFP4. ~60GB → fits B200.
     ModelDeployment(
-        key="gen_code_b200", name="GPT-OSS 120B FP8 (B200)",
+        key="gen_code_b200", name="GPT-OSS 120B MXFP4 (B200)",
         role="generate_code",
         hf_model_id="openai/gpt-oss-120b", local_equivalent="gpt-oss:120b",
-        max_model_len=65536, quantization="fp8",
+        max_model_len=65536,
         **_B200,
     ),
 

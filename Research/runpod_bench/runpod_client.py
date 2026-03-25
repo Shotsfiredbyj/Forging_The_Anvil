@@ -64,6 +64,8 @@ class JobResult:
     delay_ms: int = 0       # queue + cold start time (ms)
     execution_ms: int = 0   # worker execution time (ms)
     total_ms: int = 0       # wall clock from submit to result
+    prompt_tokens: int = 0  # from vLLM usage stats
+    completion_tokens: int = 0  # from vLLM usage stats
     error: str = ""
 
     @property
@@ -77,6 +79,13 @@ class JobResult:
     @property
     def total_s(self) -> float:
         return self.total_ms / 1000
+
+    @property
+    def tok_per_sec(self) -> float:
+        """Completion tokens per second of execution time."""
+        if self.completion_tokens > 0 and self.execution_ms > 0:
+            return self.completion_tokens / (self.execution_ms / 1000)
+        return 0.0
 
 
 def submit_job(endpoint_id: str, api_key: str,
@@ -144,19 +153,27 @@ def poll_job(endpoint_id: str, api_key: str, job_id: str,
             # Extract output text — vLLM returns in output.choices or output.text
             output_raw = body.get("output", "")
             output_text = _extract_output_text(output_raw)
+            prompt_tokens, completion_tokens = _extract_usage(output_raw)
             error = ""
 
             if job_status == "FAILED":
                 error = body.get("error", str(output_raw))
                 log.error("Job failed: job=%s error=%s", job_id, error)
             else:
-                log.info("Job complete: job=%s status=%s delay=%dms exec=%dms",
-                         job_id, job_status, delay_ms, exec_ms)
+                tok_s = (completion_tokens / (exec_ms / 1000)
+                         if completion_tokens and exec_ms else 0)
+                log.info("Job complete: job=%s status=%s delay=%dms exec=%dms "
+                         "tokens=%d/%d tok/s=%.1f",
+                         job_id, job_status, delay_ms, exec_ms,
+                         prompt_tokens, completion_tokens, tok_s)
 
             return JobResult(
                 job_id=job_id, status=job_status, output=output_text,
                 delay_ms=delay_ms, execution_ms=exec_ms,
-                total_ms=total_ms, error=error,
+                total_ms=total_ms,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                error=error,
             )
 
         log.debug("Polling: job=%s status=%s elapsed=%ds",
@@ -193,6 +210,47 @@ def _extract_output_text(output: object) -> str:
                     return choice.get("text", choice.get("message", {}).get("content", ""))
 
     return str(output) if output else ""
+
+
+def _extract_usage(output: object) -> tuple[int, int]:
+    """Extract token usage from vLLM output.
+
+    vLLM returns usage in several possible locations:
+    - output.usage.{prompt_tokens, completion_tokens}
+    - output.{prompt_tokens, completion_tokens} (flat)
+
+    Returns (prompt_tokens, completion_tokens). Zeros if not found.
+    """
+    if not isinstance(output, dict):
+        return 0, 0
+
+    # Nested usage dict (standard vLLM / OpenAI format)
+    usage = output.get("usage", {})
+    if isinstance(usage, dict) and usage:
+        return (
+            usage.get("prompt_tokens", 0),
+            usage.get("completion_tokens", 0),
+        )
+
+    # Flat fields (some vLLM worker versions)
+    prompt = output.get("prompt_tokens", 0)
+    completion = output.get("completion_tokens", 0)
+    if prompt or completion:
+        return prompt, completion
+
+    # Check inside choices (OpenAI-compatible)
+    choices = output.get("choices", [])
+    if isinstance(choices, list) and choices:
+        choice = choices[0]
+        if isinstance(choice, dict):
+            usage = choice.get("usage", {})
+            if isinstance(usage, dict):
+                return (
+                    usage.get("prompt_tokens", 0),
+                    usage.get("completion_tokens", 0),
+                )
+
+    return 0, 0
 
 
 # ---------------------------------------------------------------------------

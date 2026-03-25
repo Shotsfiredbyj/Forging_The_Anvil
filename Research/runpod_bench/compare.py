@@ -73,11 +73,11 @@ def stage_comparison(entries: list[dict]):
     """Print per-stage comparison: L40S vs B200."""
     groups = group_by(entries, "stage", "task_id", "gpu_tier")
 
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 120)
     print(f"{'Stage':<14} {'Task':<20} {'GPU':<8} {'Runs':>5} "
-          f"{'Cold(s)':>8} {'Exec(s)':>8} {'Gate%':>7} "
-          f"{'Rubric':>7} {'Cost/run':>9}")
-    print("-" * 100)
+          f"{'Cold(s)':>8} {'Exec(s)':>8} {'Tok/s':>7} "
+          f"{'Gate%':>7} {'Rubric':>7} {'Cost/run':>9}")
+    print("-" * 120)
 
     for (stage, task_id, tier), runs in sorted(groups.items()):
         n = len(runs)
@@ -85,6 +85,8 @@ def stage_comparison(entries: list[dict]):
                        if r["timing"]["cold_start_s"] > 0]
         exec_times = [r["timing"]["execution_s"] for r in runs
                       if r["timing"]["execution_s"] > 0]
+        tok_rates = [r["tokens"]["tok_per_sec"] for r in runs
+                     if r.get("tokens", {}).get("tok_per_sec", 0) > 0]
         gate_passes = sum(1 for r in runs if r["quality"]["gates_passed"])
         rubric_scores = [r["quality"]["rubric_score"] for r in runs
                          if r["quality"].get("rubric_score") is not None]
@@ -92,17 +94,19 @@ def stage_comparison(entries: list[dict]):
 
         cold_mean = statistics.mean(cold_starts) if cold_starts else 0
         exec_mean = statistics.mean(exec_times) if exec_times else 0
+        tok_mean = statistics.mean(tok_rates) if tok_rates else 0
         gate_pct = (gate_passes / n * 100) if n else 0
         rubric_mean = statistics.mean(rubric_scores) if rubric_scores else 0
         cost_mean = statistics.mean(costs) if costs else 0
 
         rubric_str = f"{rubric_mean:>6.1f}" if rubric_scores else "   n/a"
+        tok_str = f"{tok_mean:>6.1f}" if tok_rates else "   n/a"
 
         print(f"{stage:<14} {task_id:<20} {tier:<8} {n:>5} "
-              f"{cold_mean:>8.1f} {exec_mean:>8.1f} {gate_pct:>6.0f}% "
-              f"{rubric_str} ${cost_mean:>8.5f}")
+              f"{cold_mean:>8.1f} {exec_mean:>8.1f} {tok_str} "
+              f"{gate_pct:>6.0f}% {rubric_str} ${cost_mean:>8.5f}")
 
-    print("=" * 100)
+    print("=" * 120)
 
 
 # ---------------------------------------------------------------------------
@@ -249,6 +253,12 @@ def statistical_summary(entries: list[dict]):
                       if r["timing"]["execution_s"] > 0]
         cold_starts = [r["timing"]["cold_start_s"] for r in runs
                        if r["timing"]["cold_start_s"] > 0]
+        tok_rates = [r["tokens"]["tok_per_sec"] for r in runs
+                     if r.get("tokens", {}).get("tok_per_sec", 0) > 0]
+        prompt_tokens = [r["tokens"]["prompt_tokens"] for r in runs
+                         if r.get("tokens", {}).get("prompt_tokens", 0) > 0]
+        completion_tokens = [r["tokens"]["completion_tokens"] for r in runs
+                             if r.get("tokens", {}).get("completion_tokens", 0) > 0]
         costs = [r["cost_usd"] for r in runs if r["cost_usd"] > 0]
 
         print(f"\n{tier} / {model} ({len(runs)} runs)")
@@ -259,6 +269,19 @@ def statistical_summary(entries: list[dict]):
                   f"p95={_percentile(exec_times, 95):.1f}s  "
                   f"stdev={statistics.stdev(exec_times):.1f}s" if len(exec_times) > 1
                   else f"  Execution:  {exec_times[0]:.1f}s (single run)")
+
+        if tok_rates:
+            print(f"  Throughput: mean={statistics.mean(tok_rates):.1f} tok/s  "
+                  f"median={statistics.median(tok_rates):.1f} tok/s  "
+                  f"p95={_percentile(tok_rates, 95):.1f} tok/s" if len(tok_rates) > 1
+                  else f"  Throughput: {tok_rates[0]:.1f} tok/s (single run)")
+
+        if prompt_tokens:
+            print(f"  Tokens in:  mean={statistics.mean(prompt_tokens):.0f}  "
+                  f"total={sum(prompt_tokens)}")
+        if completion_tokens:
+            print(f"  Tokens out: mean={statistics.mean(completion_tokens):.0f}  "
+                  f"total={sum(completion_tokens)}")
 
         if cold_starts:
             warm = [c for c in cold_starts if c < 5]

@@ -173,9 +173,13 @@ def assemble_prompt(task_def: dict, fixtures: dict[int, dict[str, str]]) -> str:
 # JSONL logging
 # ---------------------------------------------------------------------------
 
+MAX_RETRIES = 2          # retries per attempt (so up to 3 total tries)
+RETRY_BACKOFF_BASE = 5   # seconds — doubles each retry
+
+
 def log_result(run_id: str, test_case: cfg.TestCase, attempt: int,
                job_result: runpod_client.JobResult, quality: cfg.QualityData,
-               cost_usd: float):
+               cost_usd: float, retries: int = 0):
     """Append a result entry to the JSONL log."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     entry = {
@@ -188,14 +192,20 @@ def log_result(run_id: str, test_case: cfg.TestCase, attempt: int,
         "gpu_tier": test_case.endpoint.gpu.tier.value,
         "model": test_case.endpoint.model.local_equivalent,
         "model_role": test_case.endpoint.model.role,
+        "hf_model_id": test_case.endpoint.model.hf_model_id,
         "attempt": attempt,
+        "retries": retries,
         "timing": {
             "cold_start_s": job_result.delay_s,
             "execution_s": job_result.execution_s,
             "total_s": job_result.total_s,
+            "billed_s": job_result.execution_s,  # RunPod bills execution time
         },
         "tokens": {
-            "output_len": len(job_result.output),
+            "prompt_tokens": job_result.prompt_tokens,
+            "completion_tokens": job_result.completion_tokens,
+            "tok_per_sec": job_result.tok_per_sec,
+            "output_chars": len(job_result.output),
         },
         "quality": {
             "gates_passed": quality.gates_passed,
@@ -204,6 +214,7 @@ def log_result(run_id: str, test_case: cfg.TestCase, attempt: int,
             "rubric_verdict": quality.rubric_verdict,
         },
         "cost_usd": cost_usd,
+        "cost_per_sec": test_case.endpoint.gpu.cost_per_sec,
         "status": job_result.status,
         "error": job_result.error,
     }
@@ -261,12 +272,27 @@ def run_test_case(test_case: cfg.TestCase, api_key: str,
         attempt = i + 1
         log.info("  Attempt %d/%d", attempt, test_case.num_runs)
 
-        job = runpod_client.generate(
-            ep_id, api_key, prompt,
-            max_tokens=max_tokens, temperature=temperature,
-        )
+        # Retry loop — retries on transient failures (FAILED, TIMED_OUT)
+        job = None
+        retries = 0
+        for retry in range(MAX_RETRIES + 1):
+            job = runpod_client.generate(
+                ep_id, api_key, prompt,
+                max_tokens=max_tokens, temperature=temperature,
+            )
+            if job.status == "COMPLETED":
+                break
+            retries = retry + 1 if retry < MAX_RETRIES else retry
+            if retry < MAX_RETRIES:
+                wait = RETRY_BACKOFF_BASE * (2 ** retry)
+                log.warning("  Retry %d/%d after %s (waiting %ds): %s",
+                            retry + 1, MAX_RETRIES, job.status, wait, job.error)
+                time.sleep(wait)
+            else:
+                log.error("  All retries exhausted for attempt %d: %s",
+                          attempt, job.error)
 
-        # Calculate cost
+        # Calculate cost (includes all retry execution time)
         cost_usd = job.execution_s * endpoint.gpu.cost_per_sec
 
         # Evaluate gates
@@ -302,7 +328,9 @@ def run_test_case(test_case: cfg.TestCase, api_key: str,
                 billed_s=job.execution_s,  # RunPod bills execution time
             ),
             tokens=cfg.TokenData(
-                completion_tokens=len(job.output.split()),  # rough estimate
+                prompt_tokens=job.prompt_tokens,
+                completion_tokens=job.completion_tokens,
+                tok_per_sec=job.tok_per_sec,
             ),
             quality=quality,
             cost_usd=cost_usd,
@@ -310,14 +338,14 @@ def run_test_case(test_case: cfg.TestCase, api_key: str,
         result.runs.append(run_result)
 
         # Log and save
-        log_result(run_id, test_case, attempt, job, quality, cost_usd)
+        log_result(run_id, test_case, attempt, job, quality, cost_usd, retries=retries)
         if job.output:
             save_output(run_id, test_case.stage, test_case.task_id,
                         endpoint.gpu.tier.value, attempt, job.output)
 
-        log.info("  Done: status=%s exec=%.1fs cost=$%.4f gates=%s",
-                 job.status, job.execution_s, cost_usd,
-                 "PASS" if quality.gates_passed else "FAIL")
+        log.info("  Done: status=%s exec=%.1fs tok/s=%.1f cost=$%.4f gates=%s retries=%d",
+                 job.status, job.execution_s, job.tok_per_sec, cost_usd,
+                 "PASS" if quality.gates_passed else "FAIL", retries)
 
     log.info("Complete: stage=%s task=%s gate_pass_rate=%.0f%% total_cost=$%.4f",
              test_case.stage, test_case.task_id,

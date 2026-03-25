@@ -5,6 +5,7 @@ Usage:
     python -m runpod_bench status                      Check fleet health + billing
     python -m runpod_bench run --phase A|B|C           Run benchmark phase
     python -m runpod_bench compare [--all]             Analyse results
+    python -m runpod_bench dashboard [--port 8877]     Local observability dashboard
     python -m runpod_bench teardown                    Destroy all endpoints + templates
     python -m runpod_bench gpu-check                   List available GPUs + pricing
 
@@ -26,6 +27,7 @@ import config as cfg  # noqa: E402
 import infra  # noqa: E402
 import manifest  # noqa: E402
 from compare import main as compare_main  # noqa: E402
+from dashboard import serve as dashboard_serve  # noqa: E402
 from harness import main as harness_main  # noqa: E402
 
 log = logging.getLogger("runpod_bench")
@@ -201,6 +203,11 @@ def cmd_teardown(args):
     print("\nFleet torn down. State files cleaned up.")
 
 
+def cmd_dashboard(args):
+    """Start the local dashboard server."""
+    dashboard_serve(port=args.port)
+
+
 def cmd_gpu_check(args):
     """List available GPUs on RunPod."""
     api_key = _api_key()
@@ -254,6 +261,11 @@ def main():
     p_teardown.add_argument("--yes", "-y", action="store_true",
                             help="Skip confirmation prompt")
 
+    # dashboard
+    p_dash = sub.add_parser("dashboard", help="Start local dashboard server")
+    p_dash.add_argument("--port", type=int, default=8877,
+                        help="Port to serve on (default: 8877)")
+
     # gpu-check
     sub.add_parser("gpu-check", help="List available GPUs")
 
@@ -274,6 +286,7 @@ def main():
         "run": cmd_run,
         "compare": cmd_compare,
         "teardown": cmd_teardown,
+        "dashboard": cmd_dashboard,
         "gpu-check": cmd_gpu_check,
     }
     commands[args.command](args)
