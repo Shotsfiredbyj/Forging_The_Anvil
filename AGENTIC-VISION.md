@@ -305,6 +305,26 @@ See AGENTIC-ROADMAP.md (F1, F2) for the concrete work items.
 
 ---
 
+## Principle: Sandbox vs Production
+
+The recovery loop experiments. Production is stable. Nothing the loop
+tries changes the production environment until explicitly promoted.
+
+- **Production config packs** are blessed, versioned, tested. This is
+  what runs real work and ships to users.
+- **Sandbox config packs** are cheap copies the loop can mutate freely.
+  Prompt patches, gate tweaks, model swaps — all logged, all disposable.
+- **Promotion is deliberate.** A sandbox improvement only becomes
+  production after consistent results across multiple runs, Annie's
+  review, and Jack's approval for quality contract changes.
+
+Same principle as rubric immutability — prevent invisible drift. The
+sandbox drifts intentionally; production moves only when we're sure.
+
+See AGENTIC-ROADMAP.md (D0) for the concrete work items.
+
+---
+
 ## What Doesn't Change
 
 - Forge pipeline (generate, gate, review, rewrite)

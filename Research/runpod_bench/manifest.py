@@ -149,12 +149,22 @@ FLEET: list[ModelDeployment] = [
         **_L40S,
     ),
 
-    # --- Rewrite ---
-    # Same models as generation, different endpoint for independent scaling.
+    # --- Rewrite (creative) ---
     ModelDeployment(
         key="rewrite_l40s", name="Qwen3.5 35B-A3B Rewrite FP8 (L40S)",
         role="rewrite",
         hf_model_id="Qwen/Qwen3.5-35B-A3B", local_equivalent="qwen3.5:35b",
+        max_model_len=32768, quantization="fp8",
+        **_L40S,
+    ),
+
+    # --- Rewrite (code) ---
+    # Devstral Small 2 24B: dense, 24B. ~24GB at FP8 → fits L40S.
+    # Different model family from GPT-OSS — proper second opinion on code rewrites.
+    ModelDeployment(
+        key="rewrite_code_l40s", name="Devstral Small 2 24B FP8 (L40S)",
+        role="rewrite_code",
+        hf_model_id="mistralai/Devstral-Small-2-2507", local_equivalent="devstral-small-2:24b",
         max_model_len=32768, quantization="fp8",
         **_L40S,
     ),

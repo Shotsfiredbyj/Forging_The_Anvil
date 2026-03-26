@@ -258,6 +258,63 @@ it — she's drawing on a body of work.
 
 # Dev Environment Track
 
+## D0: Sandbox / Production Separation
+
+The recovery loop experiments. Production is stable. Nothing the loop
+tries changes the production environment until explicitly promoted.
+
+### D0.1: Sandbox Config Packs
+
+- **Production config packs** — the blessed set that runs real cascades.
+  Stable, tested, versioned. This is what ships to users.
+- **Sandbox config packs** — copies that the recovery loop can mutate
+  freely. Prompt patches, gate threshold tweaks, model swaps. Every
+  change logged with rationale and result.
+- Sandbox packs are cheap copies — fork from production, experiment,
+  discard or promote. Same format, different directory.
+
+### D0.2: Promotion Gate
+
+When a sandbox change produces consistently better results, it gets
+promoted to production. Not after one good run — after N runs showing
+sustained improvement.
+
+Promotion criteria:
+- Improvement is consistent (not a one-off lucky run)
+- No regressions on other task types (fixing index_html didn't break
+  pricing_html)
+- Annie reviews and approves the change
+- Jack approves if it touches the quality contract (rubric dimensions,
+  gate additions/removals)
+
+Promotion is a deliberate act, not an automatic merge. The sandbox
+experiments; production absorbs the winners.
+
+### D0.3: Sandbox Compute Budget
+
+The sandbox has its own compute budget — separate from production.
+Prevents runaway experimentation from burning GPU hours that should
+go to real work.
+
+- Max GPU-minutes per sandbox session (configurable)
+- Max retry attempts per experiment
+- Failed experiments still logged — they go into the corpus as
+  "we tried X and it made things worse" (valuable negative signal)
+
+### D0.4: Experiment Logging
+
+Every sandbox experiment is a structured record:
+
+- What was changed (prompt patch, gate tweak, model swap)
+- Why (which failure triggered it, what the diagnosis said)
+- Result (scores before and after, pass/fail delta)
+- Promoted? (yes/no, and if yes, which production version)
+
+This is the training data for the prompt tuning agent (D2.3) —
+a history of what improvements work and what doesn't.
+
+---
+
 ## D1: Autonomous Failure Recovery
 
 ### D1.1: Generic Recovery Workflow
