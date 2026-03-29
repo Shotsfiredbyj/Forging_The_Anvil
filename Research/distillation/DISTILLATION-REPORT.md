@@ -2,8 +2,8 @@
 
 **Date:** 2026-03-27 to 2026-03-28
 **Author:** Jack + Nellie
-**Status:** Model trained, GGUF exported, deployed as `opus_annie:122b` on Annuminas
-**Evaluation:** Layer 1 (A/B creative) complete. Layer 2 (Neko regression) pending.
+**Status:** FAILED — model produces degenerate output on open-ended prompts. Not deployable.
+**Evaluation:** Layer 1 (A/B creative) complete. Real-world testing revealed critical failure.
 
 ## What This Is
 
@@ -511,14 +511,63 @@ python3 04_sft_train.py \
 ollama create opus_annie:122b -f Modelfile
 ```
 
-## Next Steps
+## Post-Mortem: Why The Model Failed
 
-1. **Evaluate** — A/B comparison of base qwen3.5:122b vs opus_annie:122b on
-   held-out prompts, scored by cross-family judge
-2. **Benchmark** — lm-eval-harness (MMLU, GSM8K, HumanEval, IFEval)
-3. **Health regression** — Run Neko eval profiles through opus_annie, compare
-   to baseline
-4. **If results are positive** — Consider DPO polish stage (Claude=chosen,
-   Qwen=rejected pairs) for further refinement
-5. **Fleet integration** — Update Arnor Gateway fleet config to use
-   opus_annie:122b as the primary model on Annuminas
+**Date discovered:** 2026-03-29 (same day as fleet integration attempt)
+
+The Layer 1 A/B eval scored opus_annie at +1.3 overall across 30 prompts.
+The scores looked promising: product reasoning +10, code +4. But when
+deployed as the default Gateway model and tested with an open-ended
+prompt ("Hi Annie"), the model produced degenerate repetitive output —
+an infinite loop of fake menu items ("Bangers and Mash with Onions and
+Mushrooms and Gravy, 11.50 pounds, Add to Basket" repeated endlessly).
+
+**Why the eval missed it:** All 30 eval prompts had strict structural
+constraints (word counts, section counts, beat structures, format rules).
+These constraints kept the model on rails. Without guardrails, the model
+has no stable attractor for open-ended generation and degenerates into
+repetitive loops.
+
+**Root cause analysis:**
+
+1. **Attention-only LoRA may not be enough.** The LoRA targeted only
+   q/k/v/o projections (14.5M params, 0.012% of 122B). This was
+   conservative to avoid destabilising MoE expert routing, but it may
+   have been too conservative — the model learned surface patterns
+   from Opus responses without internalising the deeper generation
+   discipline.
+
+2. **Training data was prompt-heavy, not conversation-heavy.** 70% of
+   prompts came from Claude Code transcripts — task-oriented, structured,
+   with clear instructions. Very few open-ended conversational exchanges.
+   The model learned to respond to structured prompts but not to chat.
+
+3. **Q4_K_M quantisation may have amplified instability.** The LoRA was
+   merged at bf16, then quantised to Q4_K_M for deployment. Aggressive
+   quantisation on top of a fine-tune can degrade output quality,
+   especially for subtle learned behaviours.
+
+4. **No degeneration testing in the eval.** The eval rubric measured
+   quality of output but not stability of generation. A simple
+   "generate 10 open-ended responses and check for repetition" test
+   would have caught this immediately.
+
+**Lessons for next attempt:**
+
+- Include open-ended conversation prompts in the eval set
+- Add a degeneration detector: flag any output with >3 repeated phrases
+- Test at Q4_K_M quantisation before declaring success
+- Consider training on conversation data, not just task completions
+- Consider higher LoRA rank or targeting MLP layers (with careful monitoring)
+- Test with the actual deployment config (identity prompt, tools, etc.)
+
+## What Was Learned
+
+Despite the deployment failure, the project validated several things:
+
+1. The distillation pipeline works end-to-end (148 dollars API, 20 dollars training)
+2. Extended thinking traces can be transferred via SFT
+3. The Forge eval engine works for A/B model comparison
+4. Structured eval is necessary but not sufficient — open-ended testing is essential
+5. The fleet integration path (HOSTS, ROUTES, MODE_DEFAULTS, /api/show) is now
+   well-understood and documented for future model additions

@@ -59,6 +59,17 @@ See `neko_regression.py --compare-only` for latest results.
 
 ---
 
+## CRITICAL: Real-World Deployment Failure
+
+**This eval is misleading.** When deployed as the default Gateway model and
+tested with open-ended prompts, opus_annie produced degenerate repetitive
+output (infinite loops of fake menu items). The structured eval prompts with
+strict constraints masked this — the model only behaves when given tight
+guardrails. It is NOT suitable for deployment as a conversational model.
+
+Reverted from all Gateway routes on 2026-03-29. See DISTILLATION-REPORT.md
+for full post-mortem.
+
 ## Interpretation Guide
 
 - **Delta > 0:** Distilled model scores higher (distillation helped)
