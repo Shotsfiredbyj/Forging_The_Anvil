@@ -528,46 +528,118 @@ These constraints kept the model on rails. Without guardrails, the model
 has no stable attractor for open-ended generation and degenerates into
 repetitive loops.
 
-**Root cause analysis:**
+**Root cause analysis (researched 2026-03-29):**
 
-1. **Attention-only LoRA may not be enough.** The LoRA targeted only
-   q/k/v/o projections (14.5M params, 0.012% of 122B). This was
-   conservative to avoid destabilising MoE expert routing, but it may
-   have been too conservative — the model learned surface patterns
-   from Opus responses without internalising the deeper generation
-   discipline.
+Post-mortem research into MoE fine-tuning literature revealed multiple
+compounding failures, all stemming from treating the MoE architecture
+like a dense model.
 
-2. **Training data was prompt-heavy, not conversation-heavy.** 70% of
-   prompts came from Claude Code transcripts — task-oriented, structured,
-   with clear instructions. Very few open-ended conversational exchanges.
-   The model learned to respond to structured prompts but not to chat.
+**1. Attention-only LoRA is fundamentally wrong for MoE.**
 
-3. **Q4_K_M quantisation may have amplified instability.** The LoRA was
-   merged at bf16, then quantised to Q4_K_M for deployment. Aggressive
-   quantisation on top of a fine-tune can degrade output quality,
-   especially for subtle learned behaviours.
+Research shows attention-only LoRA underperforms MLP-only LoRA by 5-15%
+on downstream metrics — even at high ranks (arxiv 2404.05086, MoLA ACL
+2025). The gap is worse for MoE because expert specialisation lives
+entirely in the MLP layers. By freezing all 256 experts, we prevented
+the model from adapting expert behaviour to the new task at all.
 
-4. **No degeneration testing in the eval.** The eval rubric measured
-   quality of output but not stability of generation. A simple
-   "generate 10 open-ended responses and check for repetition" test
-   would have caught this immediately.
+The irony: we avoided MLP targeting to protect routing stability, but
+the instability came from NOT targeting MLPs. Attention representations
+shifted while experts stayed frozen, creating a mismatch the router
+couldn't handle.
 
-**Lessons for next attempt:**
+**2. Routing destabilisation from attention/expert mismatch.**
 
-- Include open-ended conversation prompts in the eval set
-- Add a degeneration detector: flag any output with >3 repeated phrases
-- Test at Q4_K_M quantisation before declaring success
-- Consider training on conversation data, not just task completions
-- Consider higher LoRA rank or targeting MLP layers (with careful monitoring)
-- Test with the actual deployment config (identity prompt, tools, etc.)
+The router makes decisions based on token representations from attention
+layers. We modified those representations but froze the experts. The
+routing logits no longer matched expert capabilities, sending tokens to
+less-relevant experts. MoE-Sieve research (arxiv 2603.24044, 2026) found
+that fine-tuning causes highly skewed routing — a small subset of experts
+handles most tokens while others go cold. This reduced expert diversity
+directly causes reduced output diversity, producing repetitive loops.
+
+**3. QLoRA 4-bit is not supported for this model.**
+
+Qwen3.5-122B-A10B does NOT support QLoRA 4-bit (BitsandBytes has
+limitations with MoE architectures). Full LoRA in bf16 is the
+recommended approach (Unsloth Qwen3.5 guide). Training completed without
+obvious errors, but quantised base weights may have introduced noise
+into the LoRA adaptation.
+
+**4. Q4_K_M quantisation amplified instability.**
+
+MoE models are more sensitive to aggressive quantisation than dense
+models. With 256 experts but only 8+1 active per token, routing
+decisions must be precise. Q4_K_M can degrade routing logits enough to
+send tokens to wrong experts. Recommendation: Q5_K_M or above for MoE.
+
+**5. No auxiliary load-balancing loss during fine-tuning.**
+
+This is likely THE primary cause. Standard SFTTrainer from TRL was used
+with no auxiliary loss configured. Without load-balancing loss, the
+router can collapse — sending all tokens to a small subset of experts.
+Those experts hyper-specialise on the narrow training data, producing
+repetitive output. The fix: keep auxiliary loss active during fine-tuning
+with a smaller coefficient (roughly 1/10th of pre-training value).
+
+Source: "How MoE Models Actually Learn" (Hughes, 2026), MoE Router
+Z-Loss Instability literature.
+
+**6. Eval gap: no open-ended generation testing.**
+
+The eval rubric measured quality but not stability. All 30 eval prompts
+had strict structural constraints that kept the model on rails. A simple
+"generate 10 open-ended responses and check for repetition" test would
+have caught the degeneration immediately.
+
+## What The Correct Approach Looks Like
+
+Based on MoE fine-tuning research (MoE-Sieve, HELLoRA, DR-LoRA, Unsloth
+docs), a properly executed fine-tune of Qwen3.5-122B-A10B would:
+
+1. **Target expert MLP layers** — use HELLoRA (only hot/frequently-activated
+   experts per layer) or DR-LoRA (dynamically allocate rank based on task
+   relevance). This reduces params vs targeting all 256 experts while
+   maintaining performance.
+2. **Use full LoRA in bf16** — not QLoRA 4-bit. Requires ~256GB VRAM.
+   RunPod 2xH200 (283GB) or 3xH100 (240GB).
+3. **Keep auxiliary load-balancing loss active** — coefficient ~0.01
+   (smaller than pre-training). This prevents router collapse.
+4. **Freeze router layers** — Qwen disables router fine-tuning by default.
+   The pre-trained routing generalises better than fine-tuned routing.
+5. **Quantise conservatively** — Q5_K_M minimum, not Q4_K_M.
+6. **Eval must include open-ended generation** — degeneration detection
+   (repetition checks, diversity scoring) alongside structured rubrics.
+7. **Max context 2048 during training** — Unsloth ceiling for single-GPU
+   MoE training on this architecture.
+
+**Cost estimate for a correct redo:** 50-80 dollars compute (vs 20 dollars
+original). Needs 3xH200 or equivalent at ~12-15 dollars/hr.
+
+**Recommendation:** Park this until Rohan is built. More local compute
+removes the VRAM constraint and makes iterative attempts feasible without
+cloud GPU costs per try.
+
+## Research Sources
+
+- MoE-Sieve: Routing-Guided LoRA for MoE (arxiv 2603.24044)
+- MoLA: MoE LoRA with Layer-wise Expert Allocation (ACL Findings 2025)
+- DR-LoRA: Dynamic Rank LoRA for MoE Adaptation (arxiv 2601.04823)
+- HELLoRA: Hot Experts Layer-level LoRA (OpenReview)
+- A Note on LoRA (arxiv 2404.05086)
+- Unsloth Qwen3.5 Fine-tuning Guide
+- How MoE Models Actually Learn (Hughes, Medium 2026)
+- Solving LLM Repetition Problem in Production (arxiv 2512.04419)
 
 ## What Was Learned
 
 Despite the deployment failure, the project validated several things:
 
 1. The distillation pipeline works end-to-end (148 dollars API, 20 dollars training)
-2. Extended thinking traces can be transferred via SFT
+2. Extended thinking traces can be transferred via SFT (structured prompts showed improvement)
 3. The Forge eval engine works for A/B model comparison
-4. Structured eval is necessary but not sufficient — open-ended testing is essential
-5. The fleet integration path (HOSTS, ROUTES, MODE_DEFAULTS, /api/show) is now
-   well-understood and documented for future model additions
+4. Structured eval is necessary but NOT sufficient — open-ended testing is essential
+5. The fleet integration path (HOSTS, ROUTES, MODE_DEFAULTS, /api/show) is documented
+6. MoE models cannot be fine-tuned like dense models — attention-only LoRA, QLoRA,
+   aggressive quantisation, and missing auxiliary loss each contribute to failure
+7. The correct MoE fine-tuning approach is well-researched and feasible, but needs
+   more compute than was available (full bf16 LoRA, ~256GB VRAM)
