@@ -1,0 +1,134 @@
+# Distillation Configuration
+# Claude Opus 4.6 → Qwen3.5 122B (MoE, ~35B active)
+
+# --- Teacher generation ---
+teacher:
+  # Tiered strategy: hard prompts → Opus, rest → Sonnet
+  tiers:
+    hard:
+      model: claude-opus-4-6
+      max_tokens: 16384
+      temperature: 0.7
+      categories: [complex_reasoning, nuanced_ambiguous, architecture]
+    medium:
+      model: claude-sonnet-4-6
+      max_tokens: 8192
+      temperature: 0.7
+      categories: [analysis, instruction_following, product]
+    easy:
+      model: claude-sonnet-4-6
+      max_tokens: 4096
+      temperature: 0.7
+      categories: [code, creative, simple]
+
+  # Extended thinking captures reasoning chain for distillation
+  extended_thinking: true
+  thinking_budget: 10000
+
+  # Prompt caching — system prompt cached across requests
+  prompt_caching: true
+
+  # Rate limiting (Opus tier 1: 2000 RPM, 400K input TPM)
+  max_concurrent: 5
+  requests_per_minute: 50
+
+# --- Prompt curation ---
+prompts:
+  target_count: 5000
+  transcript_ratio: 0.70      # 70% from transcripts, 30% open-source
+
+  transcript_sources:
+    - /home/jack/.claude/projects/-home-jack-The-Founding-Of-Arnor-The-Forge/
+    - /home/jack/.claude/projects/-home-jack-Forging-The-Anvil/
+    - /home/jack/.claude/projects/-home-jack-Neko-Demo/
+    - /home/jack/.claude/projects/-home-jack-halbarad-week/
+    - /home/jack/.claude/projects/-home-jack/
+    - /home/jack/.claude/projects/-home-jack-The-Fourth-Age/
+
+  open_source:
+    - dataset: teknium/OpenHermes-2.5
+      count: 1000
+      categories: [math, science, general_analysis]
+    - dataset: microsoft/orca-math-word-problems-200k
+      count: 500
+      categories: [math_reasoning]
+
+  filters:
+    min_length_chars: 20       # Skip trivial messages
+    max_length_chars: 8000     # Skip extremely long pastes
+    min_tokens_estimate: 10    # Rough token floor
+    max_tokens_estimate: 2000  # Rough token ceiling
+
+  # Patterns to strip from transcript messages
+  strip_patterns:
+    - '<ide_opened_file>.*?</ide_opened_file>'
+    - '<ide_selection>.*?</ide_selection>'
+    - '<system-reminder>.*?</system-reminder>'
+    - '<command-name>.*?</command-name>'
+
+  # Messages matching these are filtered out entirely
+  skip_patterns:
+    - '^(yes|no|ok|sure|do it|go|yep|nope|y|n|k|👍|done|thanks|ty|lgtm)$'
+    - '^/\w+'                  # Slash commands
+    - '^\s*$'                  # Blank
+
+# --- LoRA config (MoE-aware) ---
+lora:
+  r: 32                        # Bumped from 16 — broader transfer
+  alpha: 64                    # Maintain 2x ratio
+  dropout: 0.05
+  # Attention-only for MoE safety — avoids destabilising expert routing
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+
+# --- SFT training ---
+sft:
+  learning_rate: 5.0e-7
+  epochs: 2
+  warmup_ratio: 0.1
+  max_length: 1536             # Shorter than Neko's 2048 to save activation memory
+  max_prompt_length: 768
+  optimizer: paged_adamw_8bit
+  gradient_checkpointing: true
+  bf16: true
+
+# --- Quantisation (QLoRA) ---
+quantization:
+  load_in_4bit: true
+  quant_type: nf4
+  compute_dtype: bfloat16
+  double_quant: true
+
+# --- Student model ---
+model:
+  hf_id: Qwen/Qwen3.5-122B-A10B
+  ollama_name: qwen3.5:122b
+  architecture: moe              # 256 routed experts, 8 routed + 1 shared active per token
+  total_params: 122B
+  active_params: 10B
+
+  # Hardware profiles
+  profiles:
+    local:
+      hardware: annuminas
+      gpu: "RTX Pro 6000 Blackwell 96GB"
+      batch_size: 1
+      grad_accum: 8
+      est_vram: "70-75 GB (SFT, single model)"
+      note: "Tight fit. Test with 10 examples first."
+    cloud:
+      hardware: "runpod 2xB200"
+      cost_per_hour: 9.98
+      batch_size: 2
+      grad_accum: 4
+      est_time: "2-4 hours"
+      est_cost: "$20-40"
+
+# --- Export ---
+export:
+  gguf_quantize: q5_k_m
+  ollama_host: "http://annuminas:11434"
+  ollama_name: qwen35-122b-distilled

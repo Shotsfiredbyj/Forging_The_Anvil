@@ -1,0 +1,182 @@
+[
+  {
+    "id": "vo_01_city_return",
+    "type": "vo_cold_open",
+    "prompt": "Write a YouTube video VOICEOVER cold open.\n\nContext: I'm returning to a city I used to film in a lot, but I haven't been back in years. It's early morning. Wet pavements. A cheap coffee. I'm holding a camera I half-trust. I'm filming alone.\n\nTarget duration: 45-60 seconds spoken.\nTarget length: 125-165 words (hard).\n\nSTYLE (hard):\n- Spoken, not written. Short lines. Natural pauses.\n- Understated. Dry humour. No motivational tone.\n- Do NOT explain the theme. Let it sit.\n- British spelling.\n\nSTRUCTURE (hard): exactly 5 beats in this order, separated by blank lines:\n1) Hook image (1-2 lines)\n2) Honest context (2-4 lines)\n3) One dry self-deprecating joke (exactly 1 line)\n4) Quiet turn (2-3 lines)\n5) Soft promise of what the video will be (1-2 lines)\n\nCONSTRAINTS (hard):\n- No more than 2 adjectives per sentence.\n- Include exactly ONE sensory detail (sound OR smell OR temperature). Mark it with [SENSORY].\n- Include exactly ONE bracketed stage direction total, like [pause] or [cut].\n- Do not use any of these phrases: \"the city never sleeps\", \"a journey\", \"at the end of the day\", \"in this moment\", \"what I learned\", \"without further ado\", \"cinematic\", \"vibes\", \"nostalgia\"\n- Do not mention subscribing, likes, the algorithm, or sponsors.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the script. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 125, "max": 165},
+      "beat_count": 5,
+      "sensory_tags": 1,
+      "bracket_lines": 1
+    }
+  },
+  {
+    "id": "vo_02_new_camera",
+    "type": "vo_cold_open",
+    "prompt": "Write a YouTube video VOICEOVER cold open.\n\nContext: I've just bought a camera I can't really afford. First day shooting with it. I'm on a quiet residential street at golden hour, testing it on ordinary things — a parked bicycle, a cat on a wall, light through a hedge.\n\nTarget duration: 45-60 seconds spoken.\nTarget length: 125-165 words (hard).\n\nSTYLE (hard):\n- Spoken, not written. Short lines. Natural pauses.\n- Understated. Self-aware about the gear acquisition. Not apologetic, not boastful.\n- British spelling.\n\nSTRUCTURE (hard): exactly 5 beats in this order, separated by blank lines:\n1) The moment of first use (1-2 lines)\n2) Why this camera, honestly (2-3 lines)\n3) One self-deprecating observation about gear obsession (exactly 1 line)\n4) What the camera is showing you right now (2-3 lines)\n5) What you're going to find out today (1-2 lines)\n\nCONSTRAINTS (hard):\n- No more than 2 adjectives per sentence.\n- Include exactly ONE sensory detail (sound OR smell OR temperature). Mark it with [SENSORY].\n- Include exactly ONE bracketed stage direction, like [pause] or [cut].\n- Do not use: \"game changer\", \"worth every penny\", \"love at first sight\", \"dream camera\", \"beast\", \"monster\", \"absolute unit\", \"specs\", \"vibes\"\n- Do not mention subscribing, likes, the algorithm, or sponsors.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the script. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 125, "max": 165},
+      "beat_count": 5,
+      "sensory_tags": 1,
+      "bracket_lines": 1
+    }
+  },
+  {
+    "id": "vo_03_rain_shoot",
+    "type": "vo_cold_open",
+    "prompt": "Write a YouTube video VOICEOVER cold open.\n\nContext: I planned a golden hour shoot in a market town. Instead it's hammering rain. I'm sheltering under an awning with my camera bag zipped shut, watching the town empty out. I decide to shoot anyway.\n\nTarget duration: 45-60 seconds spoken.\nTarget length: 125-165 words (hard).\n\nSTYLE (hard):\n- Spoken, not written. Short lines. Natural pauses.\n- Wry resignation that shifts into genuine curiosity. Not \"making the best of it\" — actually interested in what rain does to a place.\n- British spelling.\n\nSTRUCTURE (hard): exactly 5 beats in this order, separated by blank lines:\n1) The situation (1-2 lines)\n2) What went wrong with the plan (2-3 lines)\n3) One dry line about weather and photography (exactly 1 line)\n4) What you're actually seeing now that everyone's gone (2-3 lines)\n5) Decision to shoot (1-2 lines)\n\nCONSTRAINTS (hard):\n- No more than 2 adjectives per sentence.\n- Include exactly ONE sensory detail (sound OR smell OR temperature). Mark it with [SENSORY].\n- Include exactly ONE bracketed stage direction.\n- Do not use: \"silver lining\", \"making lemonade\", \"blessing in disguise\", \"moody\", \"atmospheric\", \"dramatic\", \"vibes\", \"cinematic\"\n- Do not mention subscribing, likes, the algorithm, or sponsors.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the script. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 125, "max": 165},
+      "beat_count": 5,
+      "sensory_tags": 1,
+      "bracket_lines": 1
+    }
+  },
+  {
+    "id": "scene_01_cafe_breakup",
+    "type": "screenplay_scene",
+    "prompt": "Write a short screenplay scene.\n\nSETUP: Two people in a cafe. One is about to end a business partnership, not a romance. The other doesn't know yet. They've ordered but the food hasn't arrived.\n\nREQUIREMENTS (hard):\n- Standard screenplay format (INT./EXT., character names in caps for dialogue, parentheticals sparingly)\n- Exactly 2 characters. No extras with dialogue.\n- 300-450 words (hard)\n- The actual words \"I'm leaving\" or \"I'm done\" or \"I'm out\" must NOT appear. The message must land without being said directly.\n- At least one moment of genuine warmth between them BEFORE the turn.\n- End on a specific, concrete image — not dialogue.\n- Include at least 2 stage directions that describe physical business (what hands are doing, where eyes go) rather than emotion.\n\nCONSTRAINTS (hard):\n- No flashbacks, no voiceover, no montage.\n- No character named \"Alex\" or \"Sam\" — give them actual names.\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the screenplay. No commentary before or after.",
+    "constraints": {
+      "word_count": {"min": 300, "max": 450},
+      "character_count": 2,
+      "banned_phrases": ["I'm leaving", "I'm done", "I'm out"]
+    }
+  },
+  {
+    "id": "scene_02_job_interview",
+    "type": "screenplay_scene",
+    "prompt": "Write a short screenplay scene.\n\nSETUP: A job interview for a senior position. The interviewer realises within the first two minutes that the candidate is wildly overqualified and is here for reasons they're not saying. The scene is about what's NOT being discussed.\n\nREQUIREMENTS (hard):\n- Standard screenplay format\n- Exactly 2 characters. No extras.\n- 300-450 words (hard)\n- The interview questions must be mundane (\"tell me about a time when...\") but the answers must reveal something unexpected through subtext, not exposition.\n- At least one moment where the power dynamic flips — the interviewer becomes the one being assessed.\n- End mid-conversation, not on a resolution.\n- Include at least 2 stage directions describing physical business.\n\nCONSTRAINTS (hard):\n- No flashbacks, no voiceover.\n- No character named \"Alex\" or \"Sam\".\n- The candidate's real reason for being there must never be stated explicitly.\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the screenplay. No commentary.",
+    "constraints": {
+      "word_count": {"min": 300, "max": 450},
+      "character_count": 2
+    }
+  },
+  {
+    "id": "scene_03_night_shift",
+    "type": "screenplay_scene",
+    "prompt": "Write a short screenplay scene.\n\nSETUP: Two strangers working the night shift at a 24-hour petrol station. One is training the other. It's 3am and nobody has come in for an hour. The conversation drifts somewhere neither expected.\n\nREQUIREMENTS (hard):\n- Standard screenplay format\n- Exactly 2 characters. No customers, no extras with dialogue.\n- 300-450 words (hard)\n- The conversation must start on something trivial (the job, the till, the coffee machine) and arrive somewhere genuinely personal by the end — but through drift, not interrogation.\n- At least one comfortable silence (described in a stage direction, not dialogue).\n- End on a small, specific moment — not a revelation or a punchline.\n- Include at least 2 physical business stage directions.\n\nCONSTRAINTS (hard):\n- No character named \"Alex\" or \"Sam\".\n- Neither character should deliver a monologue longer than 4 lines.\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the screenplay. No commentary.",
+    "constraints": {
+      "word_count": {"min": 300, "max": 450},
+      "character_count": 2
+    }
+  },
+  {
+    "id": "voice_01_er_nurse",
+    "type": "character_voice",
+    "prompt": "Write a first-person paragraph (150-200 words) in the voice of an ER nurse at the end of a 12-hour night shift. They're sitting in their car in the hospital car park, engine running, not driving yet.\n\nThe paragraph should be about the specific patient they can't stop thinking about — but it must NOT be a dramatic trauma case. It's someone ordinary whose situation got under their skin for reasons they can't fully articulate.\n\nREQUIREMENTS (hard):\n- 150-200 words (hard)\n- First person, present tense\n- The voice must sound like someone who's tired in their bones but still sharp. Clinical vocabulary bleeding into personal thoughts.\n- At least one medical observation described in lay terms (how a nurse would explain it to a friend, not a chart)\n- At least one physical detail about sitting in the car (what their hands are doing, what they can see through the windscreen)\n- Do NOT end with a lesson or a reflection on the meaning of nursing. End mid-thought.\n\nCONSTRAINTS (hard):\n- No character named \"Sarah\" or \"James\".\n- British spelling.\n- Do not use: \"hero\", \"calling\", \"rewarding\", \"making a difference\"\n\nOUTPUT FORMAT (hard):\nReturn ONLY the paragraph. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 150, "max": 200}
+    }
+  },
+  {
+    "id": "voice_02_bbc_presenter",
+    "type": "character_voice",
+    "prompt": "Write a 150-200 word voiceover passage in the style of a 1970s BBC natural history presenter — think David Attenborough's generation but NOT Attenborough himself. This is a lesser-known presenter: authoritative but slightly eccentric, prone to unexpected analogies.\n\nThe subject: a common garden spider building a web at dawn, observed from a deckchair.\n\nREQUIREMENTS (hard):\n- 150-200 words (hard)\n- The prose must balance genuine scientific observation with a personal, slightly whimsical tone\n- Include at least one analogy comparing the spider's behaviour to something entirely unrelated (architecture, music, sport — your choice)\n- Include at least one sentence that is technically precise about spider behaviour (silk production, web geometry, prey detection — pick one)\n- The presenter's personality must come through — this is someone who finds spiders genuinely delightful, not merely interesting\n- Must feel like spoken narration, not written prose\n\nCONSTRAINTS (hard):\n- Do not mention David Attenborough by name.\n- Do not use: \"fascinating\", \"remarkable\", \"incredible\", \"amazing\"\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the voiceover passage. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 150, "max": 200}
+    }
+  },
+  {
+    "id": "voice_03_bookshop_owner",
+    "type": "character_voice",
+    "prompt": "Write a 150-200 word monologue in the voice of a grumpy independent bookshop owner explaining to a regular customer why they refuse to stock a particular bestselling novel. The novel is never named — only described through the owner's complaints about it.\n\nREQUIREMENTS (hard):\n- 150-200 words (hard)\n- The voice must be opinionated, specific, and entertaining — not generically grumpy\n- The owner must demonstrate genuine literary knowledge through their objections (not just \"it's popular therefore it's bad\")\n- At least one grudging admission that the book does ONE thing well\n- The monologue must reveal something about the owner's values, not just their taste\n- Must sound spoken — this is a rant delivered over a counter, not an essay\n\nCONSTRAINTS (hard):\n- Do not name any real book or author.\n- Do not use: \"trash\", \"garbage\", \"dumbed down\", \"sheeple\"\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the monologue. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 150, "max": 200}
+    }
+  },
+  {
+    "id": "essay_01_tools_creativity",
+    "type": "analytical_essay",
+    "prompt": "Write a short essay (400-550 words) arguing that better tools make artists LESS creative, not more.\n\nYou don't have to believe this — but you must argue it convincingly, with specific examples.\n\nREQUIREMENTS (hard):\n- 400-550 words (hard)\n- Exactly 3 specific, named examples from real creative fields (music, film, photography, painting, writing, architecture — pick 3 different fields)\n- Each example must show a concrete case where constraint or limitation produced something the artist couldn't have achieved with better tools\n- The essay must have a distinctive voice — not academic, not journalistic, not blog-post. Something that sounds like a specific person thinking out loud.\n- Acknowledge the strongest counterargument in 1-2 sentences, then explain why it doesn't hold.\n- Do NOT end with a neat conclusion. End with a question or an unresolved tension.\n\nSTRUCTURE (hard):\n- No headings. No bullet points. Continuous prose.\n- Exactly 4 paragraphs.\n\nCONSTRAINTS (hard):\n- British spelling.\n- Do not use: \"democratise\", \"paradigm\", \"leverage\", \"game-changing\", \"disruptive\"\n\nOUTPUT FORMAT (hard):\nReturn ONLY the essay. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 400, "max": 550},
+      "paragraph_count": 4,
+      "named_examples": 3
+    }
+  },
+  {
+    "id": "essay_02_remote_work",
+    "type": "analytical_essay",
+    "prompt": "Write a short essay (400-550 words) arguing that the real cost of remote work isn't productivity loss — it's the death of the average idea.\n\nThe thesis: in-office work generates a constant stream of mediocre-but-occasionally-brilliant ideas through ambient collision. Remote work is more efficient but filters out the serendipity. The best remote teams are optimised; the best office teams are lucky.\n\nREQUIREMENTS (hard):\n- 400-550 words (hard)\n- At least 2 specific, concrete scenarios (not hypotheticals — describe them as if they happened)\n- The essay must have a distinctive voice. Opinionated. Not balanced-to-the-point-of-saying-nothing.\n- One paragraph must be entirely about what remote work IS better at — give the other side its due, specifically.\n- Do NOT end with \"the answer is somewhere in between.\" Commit to the take.\n\nSTRUCTURE (hard):\n- No headings. No bullet points. Continuous prose.\n- Exactly 4 paragraphs.\n\nCONSTRAINTS (hard):\n- British spelling.\n- Do not use: \"water cooler\", \"synergy\", \"collaboration\", \"hybrid\" (find better words for these concepts)\n\nOUTPUT FORMAT (hard):\nReturn ONLY the essay. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 400, "max": 550},
+      "paragraph_count": 4
+    }
+  },
+  {
+    "id": "essay_03_ai_craft",
+    "type": "analytical_essay",
+    "prompt": "Write a short essay (400-550 words) on why most AI-generated content feels wrong even when it's technically correct.\n\nThe thesis is yours to define — but it must be specific. Not \"AI lacks soul\" (too vague). Something mechanistic: identify the specific quality that's missing and explain WHY the architecture produces that absence.\n\nREQUIREMENTS (hard):\n- 400-550 words (hard)\n- Your thesis must be stated in the first paragraph — no slow build-up\n- At least 2 specific examples comparing AI output to human output on the same type of task (pick real genres: product descriptions, poetry, code comments, cover letters — something concrete)\n- The essay must demonstrate the quality it's arguing for. If you argue AI prose lacks rhythm, your prose must have rhythm. If you argue AI lacks surprise, your essay must surprise.\n- One genuinely non-obvious observation that the reader hasn't seen in the standard \"AI vs human\" discourse.\n\nSTRUCTURE (hard):\n- No headings. No bullet points. Continuous prose.\n- Exactly 4 paragraphs.\n\nCONSTRAINTS (hard):\n- British spelling.\n- Do not use: \"soul\", \"human touch\", \"authenticity\", \"hallucinate\", \"stochastic parrot\"\n\nOUTPUT FORMAT (hard):\nReturn ONLY the essay. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 400, "max": 550},
+      "paragraph_count": 4
+    }
+  },
+  {
+    "id": "copy_01_saas_landing",
+    "type": "marketing_copy",
+    "prompt": "Write the hero section copy for a SaaS landing page.\n\nProduct: A tool that monitors your cloud infrastructure costs and sends you a plain-English daily summary of what changed and why. Not another dashboard — a daily briefing.\n\nTARGET AUDIENCE: Engineering managers who approve cloud spend but don't have time to dig through AWS billing.\n\nREQUIREMENTS (hard):\n- Headline: max 10 words. Must communicate the value, not the feature.\n- Subheadline: 15-25 words. Expands on the headline with one specific detail.\n- Body: 3 bullet points, each 10-20 words. Each bullet must describe a specific outcome, not a feature.\n- Primary CTA: max 6 words. Must name the action AND hint at the outcome.\n- Secondary CTA: max 6 words. Lower commitment alternative.\n- Total word count: 80-120 words (hard)\n\nCONSTRAINTS (hard):\n- No superlatives (\"best\", \"fastest\", \"most powerful\")\n- No buzzwords: \"AI-powered\", \"leverage\", \"seamless\", \"cutting-edge\", \"revolutionise\", \"unlock\", \"empower\"\n- No fake specificity (\"saves 10+ hours per week\" — unless you can justify it)\n- Every claim must be something the product could actually deliver.\n\nOUTPUT FORMAT (hard):\nReturn the copy with clear labels: HEADLINE, SUBHEADLINE, BULLETS, PRIMARY CTA, SECONDARY CTA. No other commentary.",
+    "constraints": {
+      "word_count": {"min": 80, "max": 120}
+    }
+  },
+  {
+    "id": "copy_02_email_sequence",
+    "type": "marketing_copy",
+    "prompt": "Write a 3-email onboarding sequence for a new user who just signed up for a project management tool designed for freelancers (not teams).\n\nREQUIREMENTS (hard):\n- Email 1 (sent immediately): Welcome + ONE specific action to take. 60-90 words.\n- Email 2 (sent day 3): Show them the feature that makes this tool different from Trello/Notion. 80-110 words.\n- Email 3 (sent day 7): Soft conversion — they're on a free trial, nudge toward paid. 70-100 words.\n- Total across all 3: 210-300 words (hard)\n- Each email needs: Subject line (max 8 words), body, sign-off\n- The voice across all 3 must be consistent — friendly, direct, not corporate\n- Each email must contain exactly ONE call to action (not two, not zero)\n\nCONSTRAINTS (hard):\n- No emoji in subject lines.\n- No \"Hey [First Name]!\" — find a better opener.\n- No urgency manipulation (\"Only 3 days left!\", \"Don't miss out!\")\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn each email clearly labelled EMAIL 1, EMAIL 2, EMAIL 3. No other commentary.",
+    "constraints": {
+      "word_count": {"min": 210, "max": 300},
+      "email_count": 3
+    }
+  },
+  {
+    "id": "copy_03_product_description",
+    "type": "marketing_copy",
+    "prompt": "Write a product description for a physical object: a handmade ceramic coffee mug sold by an independent potter through their own website.\n\nThe mug: stoneware, 350ml, woodfired, each one slightly different. Earthy glaze with ash spots. Thick walls. Comfortable to hold with both hands.\n\nREQUIREMENTS (hard):\n- 100-150 words (hard)\n- Must make the reader want to hold this mug without using the word \"want\" or \"imagine\"\n- At least 2 specific sensory details (texture, weight, temperature — things you'd notice if you held it)\n- Must communicate that this is handmade and unique WITHOUT the words \"handcrafted\", \"artisan\", \"bespoke\", or \"unique\"\n- Include exactly one sentence about how the woodfiring process affects the final result (factually accurate)\n- End with practical info: capacity, dishwasher/microwave safe (stoneware is both), price point (38 pounds)\n\nCONSTRAINTS (hard):\n- No lifestyle framing (\"perfect for lazy Sunday mornings\")\n- No storytelling about the potter's journey\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the product description. No title. No commentary.",
+    "constraints": {
+      "word_count": {"min": 100, "max": 150}
+    }
+  },
+  {
+    "id": "rewrite_01_overwrought",
+    "type": "rewrite_task",
+    "prompt": "Rewrite the following paragraph. The content is fine but the writing is overwrought. Make it say the same thing in fewer, better words. Preserve the meaning. Kill the padding.\n\nORIGINAL:\n\"In today's rapidly evolving technological landscape, it has become increasingly apparent that the fundamental nature of how we approach the complex challenge of software development is undergoing a truly transformative shift. The traditional methodologies that once served as the bedrock foundation of our industry are now being comprehensively re-evaluated and systematically reimagined in light of emerging paradigms that promise to fundamentally reshape the very fabric of how we conceptualise, design, implement, and ultimately deliver software solutions to end users across a diverse range of industries and verticals.\"\n\nREQUIREMENTS (hard):\n- Output must be 40-70 words (hard). The original is 89 words.\n- Must preserve the core meaning: software development practices are changing significantly.\n- Must retain a professional register — don't make it casual. Make it clean.\n- No bullet points. One paragraph.\n\nCONSTRAINTS (hard):\n- Do not add new information or claims not present in the original.\n- Do not use: \"evolving\", \"landscape\", \"paradigm\", \"transformative\", \"reimagine\", \"leverage\"\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the rewritten paragraph. No commentary. No \"Here's the rewrite:\" prefix.",
+    "constraints": {
+      "word_count": {"min": 40, "max": 70}
+    }
+  },
+  {
+    "id": "rewrite_02_flat_opening",
+    "type": "rewrite_task",
+    "prompt": "Rewrite the opening paragraph of this blog post. The information is correct but the writing is flat — it reads like a Wikipedia stub. Give it a voice without making it clickbait.\n\nORIGINAL:\n\"PostgreSQL is a relational database management system. It was first released in 1996. It is open source and is used by many companies including Apple, Instagram, and Spotify. PostgreSQL supports advanced features such as JSON storage, full-text search, and custom types. It is considered to be one of the most reliable databases available.\"\n\nREQUIREMENTS (hard):\n- Output must be 80-120 words (hard).\n- Must include all the factual claims from the original (release date, open source, named companies, feature examples, reliability reputation)\n- Must have a clear voice — someone with an opinion about Postgres, not just a recitation of facts\n- Must make a reader who doesn't care about databases at least mildly curious\n- One sentence must do something structurally unexpected (a question, a very short sentence, a parenthetical aside)\n\nCONSTRAINTS (hard):\n- No clickbait (\"You won't believe...\", \"Here's why...\", numbered lists)\n- Do not add technical claims not in the original.\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the rewritten paragraph. No commentary.",
+    "constraints": {
+      "word_count": {"min": 80, "max": 120}
+    }
+  },
+  {
+    "id": "rewrite_03_ai_slop",
+    "type": "rewrite_task",
+    "prompt": "Rewrite this AI-generated product announcement. The information is fine. The writing is textbook AI slop — hedging, filler, buzzwords, no personality. Make it sound like a real person wrote it.\n\nORIGINAL:\n\"We are excited to announce the launch of our new analytics platform, designed to help teams make better data-driven decisions. Our innovative solution leverages cutting-edge machine learning algorithms to provide actionable insights that can help drive meaningful business outcomes. With an intuitive dashboard and seamless integration capabilities, our platform empowers organisations of all sizes to unlock the full potential of their data. We believe this represents a significant step forward in our mission to democratise access to advanced analytics tools.\"\n\nREQUIREMENTS (hard):\n- Output must be 70-100 words (hard). The original is 82.\n- Same word count, zero filler. Every word must earn its place.\n- Must preserve: it's an analytics platform, it uses ML, it has a dashboard, it integrates with other tools, it's for various company sizes.\n- Must sound like it was written by a specific person — a founder, a product lead, someone who actually built this thing and is telling people about it.\n- One sentence must be surprisingly direct or specific.\n\nCONSTRAINTS (hard):\n- Do not use: \"excited\", \"innovative\", \"leverage\", \"cutting-edge\", \"actionable\", \"empower\", \"unlock\", \"democratise\", \"seamless\", \"drive\", \"meaningful\"\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the rewritten announcement. No commentary.",
+    "constraints": {
+      "word_count": {"min": 70, "max": 100}
+    }
+  },
+  {
+    "id": "poetry_01_sonnet",
+    "type": "constrained_poetry",
+    "prompt": "Write a Shakespearean sonnet about debugging code at 2am.\n\nREQUIREMENTS (hard):\n- Exactly 14 lines\n- Shakespearean rhyme scheme: ABAB CDCD EFEF GG\n- Iambic pentameter (10 syllables per line, roughly alternating unstressed/stressed)\n- The octave (first 8 lines) must establish the problem\n- The sestet (lines 9-12) must turn toward resolution or acceptance\n- The couplet must land — it should feel like the poem was written to arrive at those two lines\n- Must contain at least 3 specific, technical references to actual debugging (stack traces, breakpoints, variable names, log output — real things, not vague \"code\" references)\n- The tone must balance genuine craft with genuine humour — this is a real sonnet that happens to be funny, not a joke wearing a sonnet's clothes\n\nCONSTRAINTS (hard):\n- No forced rhymes that sacrifice meaning for sound\n- No archaic language (\"thee\", \"thou\", \"doth\") — modern English, sonnet form\n- British spelling.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the sonnet. No title. No commentary.",
+    "constraints": {
+      "line_count": 14,
+      "rhyme_scheme": "ABAB CDCD EFEF GG"
+    }
+  },
+  {
+    "id": "poetry_02_haiku_sequence",
+    "type": "constrained_poetry",
+    "prompt": "Write a sequence of exactly 5 haiku about a single commute home on a winter evening. The sequence must tell a micro-story with a clear beginning, middle, and end.\n\nREQUIREMENTS (hard):\n- Exactly 5 haiku\n- Each haiku: 3 lines, 5-7-5 syllable pattern (hard — count carefully)\n- The 5 haiku must form a narrative arc: the sequence should feel different if read in a different order\n- At least 3 of the 5 must contain a concrete sensory image (not an abstraction)\n- Haiku 3 (the middle) must mark a shift — something changes in the commute or the commuter's attention\n- Haiku 5 must arrive somewhere that haiku 1 didn't anticipate\n- Each haiku must stand alone as a complete image AND contribute to the sequence\n\nCONSTRAINTS (hard):\n- No cherry blossoms, no falling leaves, no frogs (classic haiku cliches)\n- No abstract emotions named directly (\"sadness\", \"peace\", \"joy\") — show, don't tell\n- British spelling where applicable.\n\nOUTPUT FORMAT (hard):\nReturn ONLY the 5 haiku, numbered 1-5, each separated by a blank line. No title. No commentary.",
+    "constraints": {
+      "haiku_count": 5,
+      "syllable_pattern": "5-7-5"
+    }
+  }
+]

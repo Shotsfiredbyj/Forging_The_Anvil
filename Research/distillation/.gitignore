@@ -1,0 +1,10 @@
+# Training artifacts (large binaries)
+checkpoints/
+merged/
+data/
+
+# Secrets
+.env
+
+# Eval outputs (regenerable, large JSONL)
+eval/outputs/

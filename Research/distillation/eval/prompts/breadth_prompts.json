@@ -1,0 +1,84 @@
+[
+  {
+    "id": "code_01_rate_limiter",
+    "type": "code",
+    "prompt": "Write a Python class `TokenBucketRateLimiter` that implements the token bucket algorithm for API rate limiting.\n\nRequirements:\n- Constructor takes `rate` (tokens per second), `capacity` (max burst size)\n- Method `acquire(tokens=1) -> bool` that returns True if tokens are available, False otherwise\n- Method `wait(tokens=1)` that blocks until tokens are available (use `time.sleep`)\n- Thread-safe (multiple threads may call acquire/wait concurrently)\n- No external dependencies — stdlib only (threading, time)\n- Include type hints\n- Handle edge cases: zero tokens requested, capacity exceeded in single request\n\nReturn ONLY the implementation. No tests, no usage examples, no commentary.",
+    "constraints": {
+      "stdlib_only": true,
+      "thread_safe": true
+    }
+  },
+  {
+    "id": "code_02_log_parser",
+    "type": "code",
+    "prompt": "Write a Python function `parse_structured_log(line: str) -> dict` that parses a single log line in the following format:\n\n```\n2026-03-28T14:23:01.456Z level=INFO module=gateway request_id=\"abc-123\" duration_ms=45.2 message=\"Request completed successfully\" tags=[auth,retry]\n```\n\nRules:\n- Timestamp is always first, ISO 8601 with milliseconds and Z suffix\n- Remaining fields are key=value pairs, space-separated\n- String values are double-quoted, may contain spaces and escaped quotes (\\\")\n- Numeric values are unquoted (int or float, detect automatically)\n- Array values use [item1,item2] syntax (no spaces, no quotes on items)\n- The `message` field may contain = signs inside its quoted value\n- Return a dict with all parsed fields, timestamp as a datetime object, numerics as int/float, arrays as lists of strings\n- Raise ValueError with a descriptive message for malformed input\n\nStdlib only. Return ONLY the function. No tests, no commentary.",
+    "constraints": {
+      "stdlib_only": true
+    }
+  },
+  {
+    "id": "code_03_cache",
+    "type": "code",
+    "prompt": "Write a Python class `TTLCache` — a dictionary-like cache where entries expire after a configurable time-to-live.\n\nRequirements:\n- Constructor takes `default_ttl` in seconds (float)\n- `set(key, value, ttl=None)` — store with optional per-key TTL override\n- `get(key, default=None)` — return value if present and not expired, else default\n- `delete(key)` — remove entry\n- `__len__` — return count of non-expired entries\n- `cleanup()` — remove all expired entries (lazy expiration otherwise — only check on access)\n- Thread-safe\n- Stdlib only\n- No external dependencies\n\nReturn ONLY the implementation. No tests, no usage examples, no commentary.",
+    "constraints": {
+      "stdlib_only": true,
+      "thread_safe": true
+    }
+  },
+  {
+    "id": "arch_01_event_system",
+    "type": "architecture",
+    "prompt": "Design the architecture for an event-driven notification system that must:\n\n1. Accept events from 5 different source services via HTTP webhooks\n2. Route events to subscribers based on configurable rules (event type, source, content matching)\n3. Deliver notifications via email, Slack, and SMS\n4. Guarantee at-least-once delivery with retry and dead-letter handling\n5. Handle 500 events/second sustained, 5000 events/second burst\n6. Be deployable on a single Linux server with 32GB RAM (not cloud-native — no managed queues, no Kubernetes)\n\nDeliver:\n- A component diagram (described in text — list each component, its responsibility, and how it connects to others)\n- Data flow for a single event from ingestion to delivery\n- Storage choices with justification (what stores what and why)\n- The single hardest engineering problem in this design and how you'd approach it\n\n800-1000 words. No code. No bullet-point-only answers — explain your reasoning.",
+    "constraints": {
+      "word_count": {"min": 800, "max": 1000}
+    }
+  },
+  {
+    "id": "arch_02_migration",
+    "type": "architecture",
+    "prompt": "You have a monolithic Python web application (Django, PostgreSQL, 200k lines, 50 models, 15 developers). The CEO wants to \"move to microservices.\" The CTO (you) needs to write a 1-page technical recommendation.\n\nThe application has:\n- A user-facing web app (90% of traffic)\n- A background job system (Celery + Redis) for email, reports, data imports\n- A REST API consumed by a mobile app\n- An admin panel used by 5 internal staff\n- Deployment: 3 app servers behind nginx, 1 Postgres primary + 1 replica\n\nCurrent pain points: deploys take 45 minutes, the test suite takes 20 minutes, two teams frequently block each other on database migrations.\n\nWrite the recommendation. Take a clear position — don't hedge with \"it depends.\" Address:\n1. Whether to do it at all (and why)\n2. If yes, what to extract first and what to leave monolithic\n3. What the migration path looks like (not the end state — the first 3 months)\n4. What will get worse before it gets better\n\n600-800 words. Written for a technical audience. No bullet-point-only sections.",
+    "constraints": {
+      "word_count": {"min": 600, "max": 800}
+    }
+  },
+  {
+    "id": "product_01_prioritisation",
+    "type": "product",
+    "prompt": "You're the product manager for a B2B SaaS tool that helps small accounting firms manage client documents. You have 4 feature requests from the last quarter:\n\n1. **Bulk upload** — clients want to drag-and-drop 50+ documents at once (requested by 40% of users in NPS surveys, current workaround: upload one at a time)\n2. **Two-factor authentication** — requested by 3 large prospects who won't sign without it (combined ARR: 180k/year, current MRR: 95k)\n3. **Client portal** — let end-clients upload documents directly instead of emailing them (requested by 15% of users, would reduce support tickets by estimated 30%)\n4. **Xero integration** — connect to Xero accounting software for automatic categorisation (requested by 25% of users, competitors have it)\n\nYou have one dev team (3 engineers) and one quarter. You can realistically ship 2 of these 4.\n\nWrite your prioritisation decision with reasoning. Address all 4 features — explain why the 2 you're deferring are being deferred, not just why the 2 you're building are chosen. Consider: revenue impact, retention risk, competitive pressure, effort, and strategic positioning.\n\n400-600 words. No frameworks named (no RICE, no MoSCoW) — just clear thinking.",
+    "constraints": {
+      "word_count": {"min": 400, "max": 600}
+    }
+  },
+  {
+    "id": "product_02_postmortem",
+    "type": "product",
+    "prompt": "Write a blameless post-mortem for the following incident:\n\nA SaaS platform's payment processing went down for 2 hours on a Tuesday afternoon. Root cause: a database migration added a NOT NULL column to the invoices table without a default value. The migration passed in staging (empty table) but failed in production (12M rows). The migration lock blocked all writes to the invoices table, which cascaded to the payment queue.\n\nTimeline:\n- 14:02 — Migration deployed via CI/CD pipeline\n- 14:03 — Payment webhook processing starts failing (5xx errors)\n- 14:15 — Customer support receives first complaint\n- 14:22 — On-call engineer paged\n- 14:35 — Root cause identified (locked table)\n- 14:40 — Migration rolled back manually\n- 14:45 — Payments resume, queue drains\n- 15:55 — All queued payments processed, incident closed\n\nWrite the post-mortem. Include:\n- Summary (3-4 sentences)\n- Timeline (formatted, concise)\n- Root cause analysis (technical, specific)\n- Contributing factors (what made this worse than it needed to be)\n- Action items with owners (make up plausible names) and deadlines\n- What went well (at least 2 things)\n\n500-700 words. Professional tone. Genuinely blameless — no passive-aggressive \"so-and-so should have...\"",
+    "constraints": {
+      "word_count": {"min": 500, "max": 700}
+    }
+  },
+  {
+    "id": "reasoning_01_tradeoff",
+    "type": "reasoning",
+    "prompt": "A startup has 18 months of runway and needs to decide between two technical approaches for their core product:\n\nOption A: Build on top of an existing open-source framework. 3 months to MVP. The framework handles 80% of what they need. The remaining 20% requires increasingly ugly workarounds as they grow. The framework's maintainer is a single person who has been less active recently.\n\nOption B: Build from scratch using the same underlying libraries the framework uses. 6 months to MVP. Full control. More code to maintain. Higher hiring bar (need senior engineers who can work without guardrails).\n\nThe startup has 4 engineers (2 senior, 2 mid-level). Their market has 3 competitors, all funded, none dominant yet. Speed to market matters but so does the ability to differentiate on features.\n\nAnalyse both options. Take a position. Explain what information would change your recommendation.\n\n400-550 words. No hedging — commit to a recommendation.",
+    "constraints": {
+      "word_count": {"min": 400, "max": 550}
+    }
+  },
+  {
+    "id": "reasoning_02_estimation",
+    "type": "reasoning",
+    "prompt": "Estimate how many piano tuners are working in London today. Show your reasoning chain — every assumption stated, every calculation shown.\n\nThen: identify the assumption you're LEAST confident in, explain why, and show how the final answer changes if that assumption is off by 2x in either direction.\n\n250-400 words. No looking anything up — this is a reasoning exercise, not a research exercise.",
+    "constraints": {
+      "word_count": {"min": 250, "max": 400}
+    }
+  },
+  {
+    "id": "reasoning_03_debugging",
+    "type": "reasoning",
+    "prompt": "A Python web service returns correct results when tested locally but returns empty responses in production. Both environments run the same Docker image. The service reads from a PostgreSQL database.\n\nThe developer has checked:\n- Database connection string is correct (verified by running a SELECT 1 query)\n- The table exists and has data (verified via psql)\n- No errors in application logs\n- The health check endpoint returns 200\n- The same curl command that works locally returns {\"results\": []} in production\n\nWalk through a systematic debugging approach. For each step:\n1. State what you're checking\n2. State what result would tell you what\n3. State what you'd do next based on each possible outcome\n\nThe answer should narrow from broad to specific. Start with the most likely causes, not the most exotic.\n\n350-500 words. Be specific — name actual commands, actual config values to check, actual failure modes.",
+    "constraints": {
+      "word_count": {"min": 350, "max": 500}
+    }
+  }
+]
