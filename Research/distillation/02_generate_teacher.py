@@ -395,7 +395,7 @@ def cost_report():
 
 async def async_main(args):
     """Async entry point."""
-    prompts_file = SCRIPT_DIR / "data" / "prompts" / "curated_prompts.jsonl"
+    prompts_file = args.prompts or SCRIPT_DIR / "data" / "prompts" / "curated_prompts.jsonl"
     if not prompts_file.exists():
         print(f"Error: No curated prompts found at {prompts_file}")
         print("  Run 01_curate_prompts.py first.")
@@ -457,6 +457,8 @@ async def async_main(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Generate teacher completions")
+    parser.add_argument("--prompts", type=Path, default=None,
+                        help="Path to prompts JSONL (default: data/prompts/curated_prompts.jsonl)")
     parser.add_argument("--tier", choices=["hard", "medium", "easy"],
                         help="Run only this tier")
     parser.add_argument("--resume", action="store_true",
