@@ -56,6 +56,14 @@ Models load on demand — the fleet tab may show `--` when no model is
 loaded. This is normal. Models load on first request (~90-120s cold
 start for torch.compile, instant after).
 
+**Pre-warm readiness:** The Gateway pre-warms models before dispatching
+real work. `ensure_model_loaded()` sends a trivial probe request
+(`max_tokens: 1`) to the target model on the target host. llama-swap
+holds the connection until the vLLM container is healthy, then returns
+200. This eliminates 502 errors during model swaps. The pre-warm blocks
+for up to 180s — if it times out, the host is skipped and the next
+host in the route is tried.
+
 **Rollback to Ollama (per host):**
 ```bash
 ssh $HOST "sudo systemctl stop llama-swap && sudo systemctl start ollama"
