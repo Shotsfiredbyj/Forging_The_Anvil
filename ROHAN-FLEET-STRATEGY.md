@@ -1,5 +1,11 @@
 # Fleet Strategy: Rohan Integration
 
+> **SUPERSEDED (2026-04-05):** Rohan now runs vLLM behind llama-swap
+> (not Ollama). Two llama-swap instances: port 8080 (Pro 6000, GPU 0)
+> and port 8081 (Pro 4500, GPU 1). See `Cold_Anvil/docs/DECISIONS.md`
+> (2026-04-04 entry) for migration details. The dual-GPU architecture
+> below is still correct, but all Ollama references are historical.
+
 ## Context
 
 Rohan is a new dual-GPU inference server arriving next week. The Pro 6000

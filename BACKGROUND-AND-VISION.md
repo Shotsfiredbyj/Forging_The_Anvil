@@ -31,7 +31,7 @@ Cold Anvil didn't start as a product idea. It started as an internal tool.
 
 The Forge is the generation and evaluation engine built for the Arnor platform
 — a personal infrastructure project running across seven machines connected over
-Tailscale, with local LLM inference via Ollama.
+Tailscale, with local LLM inference via vLLM (previously Ollama).
 
 The Forge was built to solve a specific problem: generating content and code for
 GitHobbit (a fantasy-themed GitHub parody) at a quality level that didn't
