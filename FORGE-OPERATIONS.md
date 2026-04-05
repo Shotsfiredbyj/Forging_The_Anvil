@@ -108,6 +108,47 @@ gates) before you waste GPU time.
 
 ---
 
+## Fleet Warm-All
+
+Pre-builds torch.compile caches for every model on every vLLM host. Run
+this after deploying new models, updating llama-swap configs, or after a
+host reboot. It eliminates first-request cold starts (~120s per model
+down to ~30s).
+
+### When to run it
+
+- After deploying a new model to the fleet
+- After updating llama-swap configs on any host
+- After a host reboot (torch.compile caches are in-memory)
+- Before a benchmark session where cold starts would skew timings
+
+### How to run it
+
+```bash
+# Via the CLI (recommended — shows progress per model/host)
+cd "/home/jack/Forging_The_Anvil/Cold_Anvil"
+python -m pipeline.benchmark --warm
+
+# Via the Gateway API directly
+curl -X POST http://elostirion:8400/dashboard/api/fleet/warm-all
+```
+
+### What it does
+
+Iterates over every model assigned to every vLLM host in the fleet
+registry. For each combination, sends a probe request that forces
+llama-swap to load the model and vLLM to run torch.compile. The caches
+persist in memory until the vLLM process restarts.
+
+### How long it takes
+
+Depends on fleet size. Each model cold-starts in ~90-120s. Models are
+warmed sequentially per host (only one model can be loaded at a time),
+but hosts are warmed in parallel. A typical fleet warm takes 5-15
+minutes.
+
+---
+
 ## Running a Batch
 
 ```bash
@@ -384,5 +425,11 @@ For reference, every batch goes through three phases:
 3. **Rewrite** — Failed tasks rewritten sequentially on Annuminas using
    reviewer feedback. Re-reviewed after rewrite. Up to 9 total attempts
    per task (3 attempts × 3 rounds with escalating strategies).
+
+4. **Verification rewrite** — When a verification stage needs to rewrite
+   code, it uses `route_override: rewrite_code` to dispatch through the
+   rewriter model instead of the generator. This means verification
+   rewrites get the same model and routing as regular rewrites, not the
+   generation model.
 
 Generation is parallel. Review is batched. Rewrite is serial.
