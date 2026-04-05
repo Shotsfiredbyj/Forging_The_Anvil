@@ -64,6 +64,13 @@ holds the connection until the vLLM container is healthy, then returns
 for up to 180s — if it times out, the host is skipped and the next
 host in the route is tried.
 
+**Fleet pre-warm:** Before each batch's generation phase, the pipeline
+calls `fleet.warm_fleet_for_route()` to load the generation model on
+ALL hosts in the route simultaneously. This means every GPU is ready
+before the first task dispatches — no cold-start penalties on secondary
+hosts during Layer 2+ parallelism. The pre-warm runs in parallel across
+all hosts and takes ~90-120s total (the slowest host's cold start).
+
 **Rollback to Ollama (per host):**
 ```bash
 ssh $HOST "sudo systemctl stop llama-swap && sudo systemctl start ollama"
