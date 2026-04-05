@@ -119,7 +119,7 @@ down to ~30s).
 
 - After deploying a new model to the fleet
 - After updating llama-swap configs on any host
-- After a host reboot (torch.compile caches are in-memory)
+- After a host reboot (torch.compile caches are on disk but may be stale)
 - Before a benchmark session where cold starts would skew timings
 
 ### How to run it
@@ -137,15 +137,18 @@ curl -X POST http://elostirion:8400/dashboard/api/fleet/warm-all
 
 Iterates over every model assigned to every vLLM host in the fleet
 registry. For each combination, sends a probe request that forces
-llama-swap to load the model and vLLM to run torch.compile. The caches
-persist in memory until the vLLM process restarts.
+llama-swap to load the model and vLLM to run torch.compile. The compiled
+kernel caches persist on disk at `/var/cache/huggingface/_torch_compile`
+(mounted into every container via `TORCHINDUCTOR_CACHE_DIR`). This means
+caches survive container restarts and model swaps — once warmed, a model
+stays warm permanently until the cache is deleted.
 
 ### How long it takes
 
-Depends on fleet size. Each model cold-starts in ~90-120s. Models are
-warmed sequentially per host (only one model can be loaded at a time),
-but hosts are warmed in parallel. A typical fleet warm takes 5-15
-minutes.
+First warm: ~90-120s per model (torch.compile from scratch). Subsequent
+warms: ~30s per model (cached kernels on disk). Models are warmed
+sequentially per host, but hosts are warmed in parallel. A full fleet
+warm takes ~15-20 minutes cold, ~5 minutes warm.
 
 ---
 
