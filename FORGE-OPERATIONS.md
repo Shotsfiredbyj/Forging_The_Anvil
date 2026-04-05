@@ -52,9 +52,10 @@ This tells you which hosts are up, what models are loaded, and response
 times. If a host is down, fix that first.
 
 **Backend:** All forge hosts run vLLM behind llama-swap (not Ollama).
-Models load on demand — the fleet tab may show `--` when no model is
-loaded. This is normal. Models load on first request (~90-120s cold
-start for torch.compile, instant after).
+vLLM runs with `-O0` (eager mode, no torch.compile) for fast cold
+starts. Models load on demand — the fleet tab may show `--` when no
+model is loaded. This is normal. Cold starts take ~30-60s (weight
+loading only). Warm requests are instant.
 
 **Pre-warm readiness:** The Gateway pre-warms models before dispatching
 real work. `ensure_model_loaded()` sends a trivial probe request
@@ -69,7 +70,7 @@ calls `fleet.warm_fleet_for_route()` to load the generation model on
 ALL hosts in the route simultaneously. This means every GPU is ready
 before the first task dispatches — no cold-start penalties on secondary
 hosts during Layer 2+ parallelism. The pre-warm runs in parallel across
-all hosts and takes ~90-120s total (the slowest host's cold start).
+all hosts and takes ~30-60s total (the slowest host's cold start).
 
 **Rollback to Ollama (per host):**
 ```bash
@@ -105,50 +106,6 @@ python tools/forge.py --project ~/githobbit/forge --dry-run --batch my_batch.jso
 ```
 Dry-run catches config errors (missing templates, bad rubrics, invalid
 gates) before you waste GPU time.
-
----
-
-## Fleet Warm-All
-
-Pre-builds torch.compile caches for every model on every vLLM host. Run
-this after deploying new models, updating llama-swap configs, or after a
-host reboot. It eliminates first-request cold starts (~120s per model
-down to ~30s).
-
-### When to run it
-
-- After deploying a new model to the fleet
-- After updating llama-swap configs on any host
-- After a host reboot (torch.compile caches are on disk but may be stale)
-- Before a benchmark session where cold starts would skew timings
-
-### How to run it
-
-```bash
-# Via the CLI (recommended — shows progress per model/host)
-cd "/home/jack/Forging_The_Anvil/Cold_Anvil"
-python -m pipeline.benchmark --warm
-
-# Via the Gateway API directly
-curl -X POST http://elostirion:8400/dashboard/api/fleet/warm-all
-```
-
-### What it does
-
-Iterates over every model assigned to every vLLM host in the fleet
-registry. For each combination, sends a probe request that forces
-llama-swap to load the model and vLLM to run torch.compile. The compiled
-kernel caches persist on disk at `/var/cache/huggingface/_torch_compile`
-(mounted into every container via `TORCHINDUCTOR_CACHE_DIR`). This means
-caches survive container restarts and model swaps — once warmed, a model
-stays warm permanently until the cache is deleted.
-
-### How long it takes
-
-First warm: ~90-120s per model (torch.compile from scratch). Subsequent
-warms: ~30s per model (cached kernels on disk). Models are warmed
-sequentially per host, but hosts are warmed in parallel. A full fleet
-warm takes ~15-20 minutes cold, ~5 minutes warm.
 
 ---
 
@@ -294,9 +251,13 @@ curl -s http://elostirion:8400/forge/runs/{run_id}/events | jq '.'
 
 ### What's loaded on each host
 ```bash
+# Forge fleet (vLLM/llama-swap) — check via dashboard or probe
+curl -s http://elostirion:8400/dashboard/api/fleet | python3 -c "
+import sys,json; d=json.load(sys.stdin)
+for h in d.get('hosts',[]): print(f'{h[\"name\"]}: {h.get(\"loaded_model\",\"--\")}')"
+
+# Ollama hosts
 curl -s http://barrowblade:11434/api/ps | jq '.models[].name'
-curl -s http://annuminas:11434/api/ps | jq '.models[].name'
-curl -s http://anduril:11434/api/ps | jq '.models[].name'
 curl -s http://eregion:11435/api/ps | jq '.models[].name'
 ```
 
@@ -362,18 +323,17 @@ unresponsive or in a bad state, and only with user approval.
 ## Cleanup After a Run
 
 ### Unload models to free VRAM
+
+**Forge fleet (vLLM/llama-swap):** Models unload automatically when
+llama-swap swaps to a different model. No manual unload needed. To
+force-stop the current model on a host:
+```bash
+ssh $HOST "sudo podman stop llm-*"
+```
+
+**Ollama hosts:**
 ```bash
 curl -s http://{host}:{port}/api/generate -d '{"model": "{model_name}", "keep_alive": 0}'
-```
-Models auto-unload after 5 minutes of inactivity, but unload manually if
-you need the VRAM immediately or are done for the session.
-
-### Check the fleet is clean
-```bash
-# Quick sweep — should all return empty model lists
-for host in barrowblade:11434 annuminas:11434 anduril:11434 eregion:11435; do
-  echo "=== $host ===" && curl -s http://$host/api/ps | jq '.models[].name // empty'
-done
 ```
 
 ---
@@ -383,7 +343,7 @@ done
 ### "The batch seems stuck"
 1. Check Gateway status for the run_id
 2. Check which host it's stuck on (events endpoint)
-3. Check that host's Ollama is responsive: `curl http://{host}:11434/api/ps`
+3. Check that host is responsive: `curl -s http://{host}:8080/v1/models` (vLLM) or `curl -s http://{host}:11434/api/ps` (Ollama)
 4. Tell the user what you found. Don't start killing things.
 
 ### "I submitted the wrong batch"
@@ -406,12 +366,27 @@ done
 
 ## Host Reference
 
-| Host | Ollama Port | GPU | VRAM | Notes |
-|------|-------------|-----|------|-------|
-| Barrowblade | 11434 | Shared UMA | 96 GB | Shared VRAM — needs swap lock |
-| Annuminas | 11434 | RTX Pro 6000 | 96 GB | Dedicated VRAM — primary review/rewrite host |
-| Anduril | 11434 | — | — | Generation host |
-| Eregion | **11435** | B60 | 24 GB | Inference instance. **Never use 11434** (B50, memory only) |
+### Forge Fleet (vLLM + llama-swap)
+
+| Host | Port | GPU | VRAM | Notes |
+|------|------|-----|------|-------|
+| Anduril | 8080 | RTX PRO 4500 Blackwell | 32 GB | Forge fleet |
+| Annuminas | 8080 | RTX PRO 4500 Blackwell | 32 GB | Forge fleet |
+| Rohan (primary) | 8080 | RTX PRO 6000 Blackwell Max-Q | 96 GB | Forge fleet — large models (122b) |
+| Rohan (secondary) | 8081 | RTX PRO 4500 Blackwell | 32 GB | Forge fleet — second GPU |
+
+All forge hosts run vLLM with `-O0` (eager mode). llama-swap manages
+model lifecycle. Config locations:
+- Anduril/Annuminas: `/etc/llama-swap/config.yaml`
+- Rohan primary: `/etc/llama-swap/llama-swap.yaml`
+- Rohan secondary: `/etc/llama-swap/llama-swap-4500.yaml`
+
+### Other Hosts
+
+| Host | Port | GPU | VRAM | Backend | Notes |
+|------|------|-----|------|---------|-------|
+| Barrowblade | 11434 | Apple M-series (UMA) | 96 GB | Ollama | Shared VRAM — needs swap lock |
+| Eregion | **11435** | Intel Arc B60 | 24 GB | Ollama | Embeddings + specialist. **Never use 11434** (B50, memory only) |
 
 ---
 
