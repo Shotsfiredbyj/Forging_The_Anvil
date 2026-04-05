@@ -49,7 +49,17 @@ driving the pipeline.
 python tools/forge.py --health
 ```
 This tells you which hosts are up, what models are loaded, and response
-times. If a host is down or has the wrong model loaded, fix that first.
+times. If a host is down, fix that first.
+
+**Backend:** All forge hosts run vLLM behind llama-swap (not Ollama).
+Models load on demand — the fleet tab may show `--` when no model is
+loaded. This is normal. Models load on first request (~90-120s cold
+start for torch.compile, instant after).
+
+**Rollback to Ollama (per host):**
+```bash
+ssh $HOST "sudo systemctl stop llama-swap && sudo systemctl start ollama"
+```
 
 ### Check for active runs
 
@@ -240,12 +250,25 @@ process-level signals. The CLI is just a polling client — the Gateway
 owns the actual work. Killing the CLI leaves the Gateway run alive,
 burning GPU time with no one watching.
 
+**Note:** As of 2026-04-03, `cascade.py` traps SIGINT/SIGTERM and calls
+`POST /forge/cascade/{cascade_id}/cancel` before exiting. This cancels
+all active + queued runs for that cascade. So Ctrl-C on a cascade now
+does a clean cancel. The manual API calls below are still needed for
+orphaned runs or non-cascade batches.
+
 ### Cancel a specific run (preferred)
 ```bash
 curl -X POST http://elostirion:8400/forge/runs/{run_id}/cancel
 ```
 This cleanly cancels the background asyncio task on the Gateway and
 marks the run as `cancelled` in the database.
+
+### Cancel a cascade (all its runs)
+```bash
+curl -X POST http://elostirion:8400/forge/cascade/{cascade_id}/cancel
+```
+Cancels all active + queued runs belonging to a cascade. Use when the
+CLI died without the signal handler firing (network issue, OOM kill).
 
 ### Cancel all runs (emergency only)
 ```bash
