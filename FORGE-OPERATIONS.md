@@ -52,10 +52,24 @@ This tells you which hosts are up, what models are loaded, and response
 times. If a host is down, fix that first.
 
 **Backend:** All forge hosts run vLLM behind llama-swap (not Ollama).
-vLLM runs with `-O0` (eager mode, no torch.compile) for fast cold
-starts. Models load on demand — the fleet tab may show `--` when no
-model is loaded. This is normal. Cold starts take ~30-60s (weight
-loading only). Warm requests are instant.
+Models load on demand — the fleet tab may show `--` when no model is
+loaded. This is normal. Cold starts take ~35s (container start +
+weight loading + torch.compile + warmup profiling). Warm requests
+are instant. The biggest chunk of cold start time is the initial
+profiling/warmup run (~8s) — this is inherent and can't be skipped.
+
+**Cold start env vars (required on all models):** Every model entry
+in llama-swap configs must include these `-e` flags:
+- `VLLM_SKIP_P2P_CHECK=1` — skip GPU peer-to-peer check (single-GPU)
+- `TRANSFORMERS_OFFLINE=1` — block network calls to HuggingFace
+  (models are cached locally; also sets HF_HUB_OFFLINE internally)
+- `HF_HUB_DISABLE_TELEMETRY=1` — disable HF telemetry pings
+- `VLLM_COMPILE_DEPYF=0` — skip bytecode decompilation
+
+**Do NOT set `HF_HUB_OFFLINE=1` directly** — it causes
+`LocalEntryNotFoundError` hangs (vLLM #23684). Use
+`TRANSFORMERS_OFFLINE=1` instead, which sets it safely via vLLM's
+own model path resolution.
 
 **Pre-warm readiness (signal-based):** The Gateway pre-warms models
 before dispatching real work. `ensure_model_loaded()` first checks the
