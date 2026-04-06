@@ -101,6 +101,22 @@ parallel instead of serialising on one host.
 ssh $HOST "sudo systemctl stop llama-swap && sudo systemctl start ollama"
 ```
 
+### Cleaning up forge runs
+
+If you need to delete junk/test runs from the Gateway DB, use the
+cleanup script — it handles both DB records AND event log files:
+```bash
+cd /home/jack/Forging_The_Anvil/Cold_Anvil
+./deploy/clean-forge-runs.sh 2026-04-06          # delete + archive
+./deploy/clean-forge-runs.sh 2026-04-06 --dry-run # preview only
+```
+
+**NEVER reset the run counter.** The counter must always increment
+monotonically. Resetting it causes ID collisions with orphaned event
+log files — new runs append events to old log files, producing
+contaminated logs where events from two different batches share the
+same run_id. The cleanup script deliberately does not touch the counter.
+
 ### Check for active runs
 
 **Important:** The dashboard API filters out Cold Anvil runs by default.
