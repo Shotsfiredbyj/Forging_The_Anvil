@@ -382,7 +382,9 @@ for all models. Qwen3.5 models have thinking mode disabled fleet-wide
 (`--reasoning-parser qwen3 --default-chat-template-kwargs
 '{"enable_thinking": false}'`). Gemma4 on text-only hosts has multimodal
 disabled (`--limit-mm-per-prompt image=0,audio=0 --kv-cache-dtype fp8`).
-Exception: rohan primary gemma4:26b keeps multimodal (serves visual review).
+Exception: rohan primary gemma4:26b keeps multimodal (serves visual review)
+and runs with `--max-model-len 131072` (128K context) to accommodate
+full-page screenshot images in visual review requests.
 
 Config locations:
 - Anduril/Annuminas: `/etc/llama-swap/config.yaml`
