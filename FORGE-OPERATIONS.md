@@ -375,8 +375,16 @@ curl -s http://{host}:{port}/api/generate -d '{"model": "{model_name}", "keep_al
 | Rohan (primary) | 8080 | RTX PRO 6000 Blackwell Max-Q | 96 GB | Forge fleet — large models (122b) |
 | Rohan (secondary) | 8081 | RTX PRO 4500 Blackwell | 32 GB | Forge fleet — second GPU |
 
-All forge hosts run vLLM with `-O0` (eager mode). llama-swap manages
-model lifecycle. Config locations:
+All forge hosts run vLLM behind llama-swap. Model optimization is
+per-model: `-O1` (inductor compile + CUDA graphs) for models <=24B active
+params, `-O0` (eager) for larger models. 96GB rohan primary runs `-O1`
+for all models. Qwen3.5 models have thinking mode disabled fleet-wide
+(`--reasoning-parser qwen3 --default-chat-template-kwargs
+'{"enable_thinking": false}'`). Gemma4 on text-only hosts has multimodal
+disabled (`--limit-mm-per-prompt image=0,audio=0 --kv-cache-dtype fp8`).
+Exception: rohan primary gemma4:26b keeps multimodal (serves visual review).
+
+Config locations:
 - Anduril/Annuminas: `/etc/llama-swap/config.yaml`
 - Rohan primary: `/etc/llama-swap/llama-swap.yaml`
 - Rohan secondary: `/etc/llama-swap/llama-swap-4500.yaml`
