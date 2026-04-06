@@ -57,21 +57,23 @@ starts. Models load on demand — the fleet tab may show `--` when no
 model is loaded. This is normal. Cold starts take ~30-60s (weight
 loading only). Warm requests are instant.
 
-**Pre-warm readiness:** The Gateway pre-warms models before dispatching
-real work. `ensure_model_loaded()` first checks the health cache —
-`_health_check_vllm` queries llama-swap `/running` to see if the model
-is already loaded. If it is, the probe is skipped (instant return).
-If not, a trivial probe request (`max_tokens: 1`) is sent. llama-swap
-holds the connection until the vLLM container is healthy, then returns
-200. This eliminates 502 errors during cold model swaps.
+**Pre-warm readiness (signal-based):** The Gateway pre-warms models
+before dispatching real work. `ensure_model_loaded()` first checks the
+health cache — `_health_check_vllm` queries llama-swap `/running` to
+see if the model is already loaded. If it is, the probe is skipped
+(instant return, logged as "already warm"). If not, a trivial probe
+request (`max_tokens: 1`) is sent. llama-swap holds the connection
+until the vLLM container is healthy, then returns 200 — the 200
+response IS the readiness signal. No timeouts, no polling, no guessing.
+The httpx timeout (330s) is set above llama-swap's healthCheckTimeout
+(300s) so llama-swap is always the authority on whether a model can
+start. All probes log duration on success and failure.
 
 **Fleet pre-warm:** Before each batch's generation phase, the pipeline
 calls `fleet.warm_fleet_for_route()` to load the generation model on
-ALL hosts in the route simultaneously. Every GPU is ready before the
-first task dispatches — no cold-start penalties on secondary hosts
-during Layer 2+ parallelism. Each host has a 30-second timeout — slow
-or broken hosts are skipped rather than blocking the fleet. Skipped
-hosts are warmed lazily if a task routes to them.
+ALL hosts in the route simultaneously. Waits for the readiness signal
+from every host — every GPU is ready before the first task dispatches.
+Logs start, per-host timing, and total duration.
 
 **Fleet dispatch distributes tasks.** `acquire_for_forge()` uses
 gen_lock exclusion: if a host's lock is held by another task, the host
