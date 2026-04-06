@@ -58,19 +58,27 @@ model is loaded. This is normal. Cold starts take ~30-60s (weight
 loading only). Warm requests are instant.
 
 **Pre-warm readiness:** The Gateway pre-warms models before dispatching
-real work. `ensure_model_loaded()` sends a trivial probe request
-(`max_tokens: 1`) to the target model on the target host. llama-swap
+real work. `ensure_model_loaded()` first checks the health cache —
+`_health_check_vllm` queries llama-swap `/running` to see if the model
+is already loaded. If it is, the probe is skipped (instant return).
+If not, a trivial probe request (`max_tokens: 1`) is sent. llama-swap
 holds the connection until the vLLM container is healthy, then returns
-200. This eliminates 502 errors during model swaps. The pre-warm blocks
-for up to 180s — if it times out, the host is skipped and the next
-host in the route is tried.
+200. This eliminates 502 errors during cold model swaps.
 
 **Fleet pre-warm:** Before each batch's generation phase, the pipeline
 calls `fleet.warm_fleet_for_route()` to load the generation model on
-ALL hosts in the route simultaneously. This means every GPU is ready
-before the first task dispatches — no cold-start penalties on secondary
-hosts during Layer 2+ parallelism. The pre-warm runs in parallel across
-all hosts and takes ~30-60s total (the slowest host's cold start).
+ALL hosts in the route simultaneously. Every GPU is ready before the
+first task dispatches — no cold-start penalties on secondary hosts
+during Layer 2+ parallelism. Each host has a 30-second timeout — slow
+or broken hosts are skipped rather than blocking the fleet. Skipped
+hosts are warmed lazily if a task routes to them.
+
+**Fleet dispatch distributes tasks.** `acquire_for_forge()` uses
+gen_lock exclusion: if a host's lock is held by another task, the host
+is excluded and the next available host is tried. Combined with
+`/running`-based loaded_models detection (routing prefers hosts with the
+model already loaded), tasks distribute across available GPUs in
+parallel instead of serialising on one host.
 
 **Rollback to Ollama (per host):**
 ```bash
