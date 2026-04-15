@@ -1,3 +1,5 @@
+> **ARCHIVED 2026-04-15.** Superseded by `/home/jack/Forging_The_Anvil/respec/03-spec.md`. Read the respec first; this file is preserved for historical context only.
+
 # Cold Anvil — Agentic Roadmap
 
 Concrete work items under each milestone from AGENTIC-VISION.md.

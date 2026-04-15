@@ -1,3 +1,5 @@
+> **ARCHIVED 2026-04-15.** Superseded by `/home/jack/Forging_The_Anvil/respec/03-spec.md`. Read the respec first; this file is preserved for historical context only.
+
 # Cold Anvil — Agentic Evolution
 
 How Cold Anvil evolves from a transactional pipeline into an agentic platform.

@@ -1,3 +1,5 @@
+> **ARCHIVED 2026-04-15.** Superseded by `/home/jack/Forging_The_Anvil/respec/03-spec.md`. This described HTTP API contracts for the service the respec is rewriting. Preserved as historical reference; do not implement against this document.
+
 # Cold Anvil — API Contract
 
 **Written:** 23 March 2026

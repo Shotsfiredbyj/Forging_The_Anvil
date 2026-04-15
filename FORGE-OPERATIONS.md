@@ -1,3 +1,5 @@
+> *Operational guide for the Arnor substrate. Not product-facing. The product spec lives at `/home/jack/Forging_The_Anvil/respec/03-spec.md`.*
+
 # Forge Operations Guide
 
 How to run forge batches and cascades without making a mess.

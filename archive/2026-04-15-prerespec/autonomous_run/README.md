@@ -1,0 +1,2 @@
+> **ARCHIVED 2026-04-15.** These direct-review reports, runners, state files, and result summaries are the evidence behind the respec at `/home/jack/Forging_The_Anvil/respec/`. They are the reason Cold Anvil stopped trusting the grade pipeline and started opening browsers. Preserved as historical evidence only — do not treat any file in this directory as current guidance. New direct-review work post-respec belongs in a new location tied to the new implementation, not here.
+

@@ -1,7 +1,10 @@
 # Cold Anvil — Business Plan
 
-**Updated:** 23 March 2026
-**Status:** V2 — Cascade depth pricing, revised margins, long-term vision
+**Updated:** 9 April 2026
+**Status:** V3 — Pipeline assumptions refreshed (single reviewer, sub-40B
+rewriters, iterative code gen, execution verification). Heavy user stress
+test added. Cost model cross-referenced with pricing research. Competitive
+moat updated with harness engineering and cost structure evidence.
 
 ---
 
@@ -168,14 +171,31 @@ on the other side of the paywall.
 
 ### Pipeline Workload
 
-Every output runs through a three-phase review cascade:
+**Updated 2026-04-09** to reflect actual measured pipeline configuration.
 
-1. **Generation** — qwen3.5:35b or gpt-oss:20b, parallel across fleet
-2. **Review** — gemma3:27b-it-fp16 + mistral-small3.2:24b (dual independent)
-3. **Rewrite** — qwen3.5:122b (Q8), queue-based processing
+Every output runs through a multi-phase quality cascade:
 
-Every version — first draft and every rewrite — gets two independent reviews
-before pass/fail.
+1. **Generation** — gemma4-26b or qwen3.5-35b (sub-40B MoE), parallel across fleet
+2. **Review** — single reviewer (mistral-small3.2:24b), rubric-based scoring
+   with binary checkpoints + chain-of-thought. Blueprint + CSS passed as
+   review context for cross-file awareness.
+3. **Rewrite** — sub-40B models (qwen3.5-27b/35b, gpt-oss-20b, devstral-24b).
+   Structured JSON patches with refusal detection.
+4. **Verification** — execution-based (linters, compilers, cross-file checks).
+   5 language adapters. Not GPU work — runs on CPU.
+5. **Integration review** — cross-file coherence check (diagnostic, no rewrite).
+
+**Changes from original plan (March 2026):**
+- Dual independent reviewers → **single reviewer.** Phase 1 benchmarks showed
+  reviewer disagreement added cost without improving quality. Single reviewer
+  cuts review time ~50%.
+- 122B rewrite model → **sub-40B rewriters.** Harness engineering research
+  (Apr 2026) confirmed that pipeline architecture matters more than model size.
+  Kozuchi achieved 74.8% SWE-bench with 27B, beating 480B models. Sub-40B
+  rewriters run on 32GB GPUs, no need for 96GB+ cards.
+- Code gen is now **iterative** (layer-by-layer with dependency ordering),
+  not parallel batch. Slower per cascade but higher quality.
+- Execution-based verification added. CPU-only, no GPU cost.
 
 ### Data Sovereignty
 
@@ -190,37 +210,78 @@ Depth pricing aligns cost-to-serve with revenue. Deeper tiers cost more to
 serve but charge proportionally more — and the heaviest value stages (assembly,
 verification, deployment) are actually cheap in GPU terms.
 
-### GPU Time Per Cascade (2x B200, uncontested)
+### GPU Time Per Cascade — Measured vs Estimated
 
-| Tier | Stages | GPU-heavy work | Est. GPU time |
-|------|--------|---------------|---------------|
-| Free | Steps 1-3 | Conversational Q&A (35B) + 1 gen + dual review | ~2-3 min |
-| Tier 1 (29) | Steps 1-5 | + roadmap gen/review + content gen/review | ~5-6 min |
-| Tier 2 (49) | Steps 1-7 | + tech design + code gen (multiple files, each reviewed) | ~8-10 min |
-| Tier 3 (200) | Steps 1-9 | + assembly (mostly deterministic) + verification (tools) + iteration | ~10-12 min |
+**Dev fleet measured times (Apr 2026):** Full website cascade (5 stages,
+iterative code gen with verification) on 4x 32-96GB cards over Tailscale:
+
+| Metric | Time |
+|--------|------|
+| Minimum | 37.1 min |
+| Average | 51.5 min |
+| Maximum | 61.9 min |
+| Median  | 51.0 min |
+
+These times include significant overhead from the dev fleet: model swapping
+between hosts (30-60s cold starts), Tailscale network latency, 4 separate
+cards without NVLink, and the full iterative pipeline (layer-by-layer code
+gen with per-layer verification + rewrite cycles).
+
+**Production estimates (2x B200, uncontested):**
+
+B200 is ~4-5x faster per GPU than Pro 6000 (which itself is ~3x faster than
+the Pro 4500s in the dev fleet). 2x B200 with NVLink eliminates model swap
+overhead (384GB pooled VRAM holds all models simultaneously). Estimated
+production speed improvement: 3-5x over dev fleet.
+
+| Tier | Stages | GPU-heavy work | Est. GPU time (2x B200) |
+|------|--------|---------------|------------------------|
+| Free | Steps 1-3 | Conversational Q&A (27-35B) + 1 gen + single review | ~1-2 min |
+| Tier 1 (29) | Steps 1-5 | + roadmap gen/review + content gen/review | ~3-4 min |
+| Tier 2 (49) | Steps 1-7 | + tech design + iterative code gen (layer-by-layer, each verified + reviewed) | ~10-15 min |
+| Tier 3 (200) | Steps 1-9 | + assembly (deterministic) + execution verification (CPU) + iteration | ~12-18 min |
 
 The big jump is Tier 1 to Tier 2. Code generation is the heaviest stage —
-multiple files, each going through generation + dual review + possible rewrite
-on the 122B model. Tier 3 adds relatively little compute — assembly is file
-operations and light LLM config generation, verification is html-validate /
-stylelint / lighthouse running locally. The value of Tier 3 is in deployment
-guidance and platform access, not GPU time.
+iterative layer-by-layer generation with per-layer execution verification and
+rewrite cycles. Single reviewer (not dual) and sub-40B rewriters (not 122B)
+reduce review/rewrite time vs the original plan, but iterative mode adds
+time vs parallel batch. Net effect: Tier 2 GPU time is similar to the
+original estimate despite the heavier pipeline.
+
+Tier 3 adds relatively little GPU compute — assembly is file operations and
+light LLM config generation, verification is html-validate / stylelint /
+Playwright / language-specific linters running on CPU. The value of Tier 3
+is in deployment guidance and platform access, not GPU time.
 
 ### Capacity (2x B200, 8hrs/day = 240 GPU-hours/month)
 
 At 50 customers (25 Tier 1 / 18 Tier 2 / 7 Tier 3), assuming 2 cascades per
-customer plus conversational Q&A:
+customer per month plus conversational Q&A:
 
-- Pipeline compute: ~778 min (~13 hours)
-- Conversational Q&A: ~1,500 min (~25 hours)
-- **Total: ~38 hours/month — 16% of capacity**
+- Free/Tier 1 pipeline: 25 customers × 2 cascades × 4 min = 200 min
+- Tier 2 pipeline: 18 customers × 2 cascades × 15 min = 540 min
+- Tier 3 pipeline: 7 customers × 2 cascades × 18 min = 252 min
+- Conversational Q&A: 50 customers × 30 min/month = 1,500 min
+- **Total: ~2,492 min (~42 hours/month — 17% of capacity)**
 
-Substantial headroom. The bottleneck isn't total capacity but peak concurrent
-throughput (see Time to Value section).
+Substantial headroom. Even at 5 cascades per customer (heavy usage):
+~5,480 min (~91 hours — 38% of capacity). The bottleneck isn't total
+capacity but peak concurrent throughput.
+
+**Compared to original estimate:** Very similar (was 38 hours at 16%). The
+heavier iterative pipeline is offset by single reviewer + smaller rewriter
+models. The capacity story is unchanged.
 
 ---
 
 ## Cost Math and Margins
+
+**Updated 2026-04-09** — cross-referenced with pricing research
+(Research/pricing_models_research.md). Core margin model validated: GPU is
+fixed cost, margins improve with scale, flat-rate-within-depth is sustainable.
+Pipeline changes (single reviewer, sub-40B rewriters) reduce per-cascade
+compute but don't materially change the margin picture because GPU cost is
+fixed regardless of utilisation at early scale.
 
 ### Fixed Costs Per Month
 
@@ -280,6 +341,36 @@ driven by Tier 3's economics — high price, low marginal compute cost.
 | Cold Anvil at 50 customers | 54% |
 | Cold Anvil at 200 customers | 83% |
 
+### Heavy User Stress Test (added 2026-04-09)
+
+The pricing research modelled extreme usage scenarios against the fixed cost
+structure. Because GPU is a fixed cost, the question isn't "can we afford
+heavy users" but "do they saturate capacity."
+
+| Usage level | Cascades/month | Amortised compute | Revenue (Tier 3) | Margin |
+|-------------|---------------|-------------------|-----------------|--------|
+| Typical | 2 | ~0.06 | 200 | 99.97% |
+| Moderate | 10 | ~0.23 | 200 | 99.88% |
+| Heavy | 30 | ~0.59 | 200 | 99.70% |
+| Extreme | 100 | ~2.30 | 200 | 98.85% |
+| Abusive | 500 | ~11.50 | 200 | 94.25% |
+
+Even 500 cascades/month (16+/day, every day) only amortises to ~$11.50 in
+compute against $200 revenue. The margin never breaks.
+
+**But throughput matters.** 500 cascades at ~15 min each = 125 GPU-hours =
+52% of monthly capacity from one user. This is not a cost problem but a
+queuing problem for other users. Natural ceilings exist: each cascade takes
+25-45 min of user time (conversation + review), so even dedicated users
+struggle to run more than 5-10/day.
+
+**Implication:** No per-cascade usage cap is needed at any tier. The
+economics are self-balancing — heavy users are free within existing GPU
+capacity, and more GPUs are only needed when more paying customers fund them.
+
+See Research/pricing_models_research.md §7 for full stress test and industry
+usage distribution data.
+
 ### What This Means
 
 - **Tier 1 at 27% is thin but intentional.** It's the entry point, not the
@@ -291,6 +382,9 @@ driven by Tier 3's economics — high price, low marginal compute cost.
 - **Every Tier 2-to-3 conversion adds ~141/month in profit.** The product
   strategy and the business strategy are the same: make the depth upsell
   irresistible.
+- **Unlimited iteration is affordable.** At ~$0.003/pass, even 100
+  iterations costs $0.30. This enables the "no credits, no tokens"
+  positioning that directly attacks competitor weakness.
 
 ---
 
@@ -298,14 +392,23 @@ driven by Tier 3's economics — high price, low marginal compute cost.
 
 ### Proprietary Infrastructure (Opaque to Users)
 
-1. **Three-phase review cascade** — We don't disclose how many reviewers,
-   which models, or the baseline rubrics. Users get quality, not the recipe.
+1. **Multi-phase quality cascade** — generation, rubric-based review with
+   binary checkpoints, structured rewrite, execution-based verification, and
+   integration review. We don't disclose how many phases, which models, or
+   the rubric structure. Users get quality, not the recipe.
 
-2. **Model family expertise** — Tested generator/reviewer pairings for code
-   and creative work. Years of experimentation on what families work together.
+2. **Harness engineering** — the pipeline architecture matters more than the
+   model. Phase 1 benchmarks showed 5.2pp spread from harness alone (same
+   model). Fujitsu achieved 74.8% SWE-bench with a 27B model through pipeline
+   engineering, beating 480B models. Our pipeline IS the product.
 
 3. **Secret forge packs** — Internal format for prompting, gates, rubrics.
    The output is public, the compilation is not.
+
+4. **Cost structure moat** — self-hosted sub-40B models at ~$0.003/artifact
+   vs competitor API costs of ~$0.96/artifact. 300x advantage enables
+   flat-rate pricing that API-dependent competitors cannot sustain. See
+   Research/small_models_vs_frontier_research.md.
 
 ### Accumulated Context (The Real Moat)
 

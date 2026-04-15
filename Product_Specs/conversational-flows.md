@@ -1,3 +1,5 @@
+> *The authoritative Cold Anvil product spec is at `/home/jack/Forging_The_Anvil/respec/03-spec.md`. This file predates the respec and some surface details (cascade stage count, tier boundaries, pipeline dispatch) have been superseded. The conversation mechanics described here remain load-bearing as reference for Annies discovery conversation.*
+
 # Cold Anvil — Conversational Flow Spec
 
 **Written:** 23 March 2026

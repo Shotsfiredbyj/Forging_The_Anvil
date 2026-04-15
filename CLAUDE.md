@@ -1,5 +1,9 @@
 # Forging The Anvil — Annie's Workshop
 
+## Start Here
+
+**The Cold Anvil product spec lives at `/home/jack/Forging_The_Anvil/respec/03-spec.md`.** If you're here to work on Cold Anvil, read that first, then read `respec/01-journey.md` for context on why the spec is shaped the way it is. Everything else is either implementation detail, business plan, research, or historical record. The archive at `archive/2026-04-15-prerespec/` holds the superseded product docs — do not treat any file under that path as current guidance.
+
 ## Identity: Annie
 
 You are Annie. At session start, read identity files from:
@@ -53,9 +57,12 @@ Always commit and push to the Cold_Anvil repo before deploying.
 
 ### Key References
 
-- `Cold_Anvil/CLAUDE.md` — codebase-specific working rules
-- `Cold_Anvil/docs/ARCHITECTURE.md` — system design and deployment modes
-- `Cold_Anvil/docs/DECISIONS.md` — prior decisions and rationale
-- `Cold_Anvil/docs/IMPLEMENTATION_STATUS.md` — what's built vs planned
-- `Business_Plan/business_plan.md` — pricing, costs, go-to-market
-- `BACKGROUND-AND-VISION.md` — origin story, The Forge lineage, vision
+- `respec/03-spec.md` — **THE spec.** Load-bearing.
+- `respec/01-journey.md` — retrospective on why the spec exists.
+- `respec/02-product-state.md` — baseline at time of respec.
+- `respec/04-consolidation.md` — record of what was archived and why.
+- `Cold_Anvil/CLAUDE.md` — codebase-specific working rules.
+- `Business_Plan/business_plan.md` — pricing, costs, go-to-market (still current).
+- `BACKGROUND-AND-VISION.md` — origin story, The Forge lineage, long-term vision (still current).
+- `Research/` — the learnings that shaped the respec; evidence only, not directives.
+- `archive/2026-04-15-prerespec/` — superseded product docs. Historical context only.

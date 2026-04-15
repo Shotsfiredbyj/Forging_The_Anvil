@@ -1,3 +1,5 @@
+> *Operational guide for the Arnor substrate. Not product-facing. The product spec lives at `/home/jack/Forging_The_Anvil/respec/03-spec.md`.*
+
 # Fleet Strategy: Rohan Integration
 
 > **SUPERSEDED (2026-04-05):** Rohan now runs vLLM behind llama-swap

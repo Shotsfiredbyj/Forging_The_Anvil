@@ -1,0 +1,106 @@
+{
+  "current_phase": "5_final_report",
+  "phase4_revert_commit": "9790968",
+  "phase4_final_decision": "Option A - hard revert 59b70ca per user approval. Production pipeline = post-Phase-3 state.",
+  "_prior_phase_4b": "4_tailwind_v1_FAILED_awaiting_user_decision",
+  "phase4_result": {
+    "cascade_grade_reported": "A 9/9 (false positive — reviewer blind spot)",
+    "cascade_grade_reality": "catastrophically broken — 3 pages have placeholder comments instead of nav/footer, class=\"components/footer.html\" file-path-as-class-value, dozens of HTML classes reference undefined CSS rules",
+    "per_task_review_verdicts": "all tasks got REVISE verdicts with scores 34-71 in iterative_review cycles",
+    "root_causes": [
+      "allowlist builder generates classes from design tokens but nothing wires them to Tailwind config or CSS",
+      "rewriter regresses when forced to fix (71.5 -> 39.5 on about_html)",
+      "devstral reviewer graded broken output as A (same class of blind spot as mistral on @media var())",
+      "hybrid cached blueprint has vanilla prose + Tailwind tech_stack, confusing the model"
+    ],
+    "infrastructure_status": "scaffolding is sound (227 tests pass, allowlist builder runs, verification branch fires, Tailwind CLI installs). Only the ALLOWLIST DESIGN and prompt-mode interaction are broken.",
+    "recommendation": "Option A - hard revert commit 59b70ca. RI-1 needs v2 redesign (real Tailwind utilities or theme mapping). Wave 2 project."
+  },
+  "_prior_phase_4": "4_tailwind_v1_cascade_running",
+  "phase4_commit": "59b70ca",
+  "phase4_runner_pid": 205280,
+  "phase4_log": "/tmp/tailwind_v1.log",
+  "phase4_cached_file": "forge/benchmarks/cached_stages_strong_tailwind.json",
+  "phase4_allowlist_size": 713,
+  "phase4_started_at": "2026-04-14T09:13:00Z",
+  "phase4_node_install": "v20.19.2 on both laptop (.npm-global/bin) and elostirion (/usr/local/bin)",
+  "phase4_tailwind_version": "v3.4.19",
+  "_prior_phase_3": "3_ri3_complete_awaiting_user_decision",
+  "phase3_result": {
+    "runs": [
+      {"run_idx": 0, "grade": "B", "pass": "7/9", "time_s": 3001},
+      {"run_idx": 1, "grade": "B", "pass": "8/9", "time_s": 2198},
+      {"run_idx": 2, "grade": "B", "pass": "8/9", "time_s": 2534}
+    ],
+    "avg_pass": "7.67/9",
+    "avg_time_s": 2578,
+    "vs_ri5_sanity": "+1.67 pass count, ~0 runtime cost",
+    "consistent_improvements": ["css_styles_css", "early_access_html"],
+    "stochastic_files": ["components_nav_html", "components_footer_html", "product_html"],
+    "nav_variance_proof": "byte-identical nav.html graded B in run_1 and D in run_2 (diff empty)",
+    "recommendation": "KEEP SHIPPED, proceed to Phase 4"
+  },
+  "_prior_phase_3": "3_ri3_validation_running",
+  "phase3_commit": "61797b4",
+  "phase3_validation_pid": 191193,
+  "phase3_log": "/tmp/ri3_validation.log",
+  "phase3_expected_cascades": 3,
+  "phase3_started_at": "2026-04-14T00:30:00Z",
+  "_prior_phase_2": "2_ri5_complete_awaiting_user_decision",
+  "phase2_result": {
+    "overall_grade": "B",
+    "pass_count": 6,
+    "task_count": 9,
+    "runtime_s": 2487.7,
+    "c_graded_files": ["components_footer_html", "css_styles_css", "early_access_html"],
+    "target_bugs_fixed": {
+      "no_var_in_media": "YES — CSS media queries use literal values",
+      "fragment_is_document": "YES — nav.html is a proper fragment"
+    },
+    "regression_vs_baseline": "pass 9/9 -> 6/9, runtime +73%",
+    "regression_interpretation": "Three C-grade files are flagged for inline styles/duplication (pre-existing code smells) that reviewer is now seeing more clearly. Not caused by RI-5's rule fires.",
+    "recommendation": "KEEP SHIPPED, second-combo validation as follow-up"
+  },
+  "phase2_output_dir": "/tmp/coldanvil_incremental_32evdhq_",
+  "phase2_commit": "0d9089f",
+  "phase2_sanity_cascade_pid": 179100,
+  "phase2_sanity_cascade_log": "/tmp/ri5_sanity.log",
+  "phase2_offline_audit": {
+    "files_scanned": 1224,
+    "projects_scanned": 231,
+    "no_var_in_media_hits": 42,
+    "fragment_is_document_hits": 9,
+    "parse_error_hits": 0,
+    "recommendation": "MERGE"
+  },
+  "phase2_gateway_wiring": "DEFERRED — Cold_Anvil side captures primary value; Gateway side is compute optimization only. Documented as follow-up.",
+  "_prior_phase": "1_infra_fixes_complete",
+  "started_at": "2026-04-13T10:30:00Z",
+  "baseline_commits": {
+    "cold_anvil": "d22a9b26533e0a199827b89ebc92b6e5a62e31a6",
+    "arnor_gateway": "25d981361991d92e394806c24bd2ba5f4bd6ce63"
+  },
+  "phase1_commits": {
+    "cold_anvil": "2bf705a",
+    "arnor_gateway": "8230158"
+  },
+  "phase1_summary": {
+    "subagent_1A_gateway": "busy_timeout=30000 + _forge_accepted_monitor (10min loop, 1h TTL). Transitions stale accepted runs to 'interrupted' via shared forge_store writer. +43 LOC across forge_logging.py and main.py.",
+    "subagent_1B_cold_anvil": "sys.stdout.reconfigure(line_buffering=True) in pipeline/__init__.py + _cancel_active_cascade error logging with 1 retry in cascade.py. +45 LOC across __init__.py and cascade.py.",
+    "pyright_fixes_after_subagents": "Added type: ignore on reconfigure calls (TextIO stub doesn't expose it). Changed `data.get(...)` to `(data or {}).get(...)` in _attempt_cancel for None-safety. Pre-existing pyright issues in both repos left untouched.",
+    "validation": "Both repos py_compile clean. Cold_Anvil imports clean. Nohup smoke test confirmed stdout buffering fix (smoke 0/1 visible at 0.8s into 1.2s process).",
+    "deploy": "Gateway restarted via restart-gateway.sh. All self-tests pass, smoke test green, no startup errors.",
+    "first_accepted_monitor_fire": "Will fire at t+10min after Gateway boot (~21:18 UTC). Verified in-passing during Phase 2 sanity cascade journal scan."
+  },
+  "cold_anvil_working_tree": "DIRTY — pre-existing user changes to docs/ROADMAP.md, deleted tracked benchmark JSON files, untracked deploy scripts. NOT touched by commit 2bf705a (used explicit git add <file>).",
+  "arnor_gateway_working_tree": "clean",
+  "findings_not_in_plan": [
+    "RI-3 must update TWO format() call sites in forge_pipeline.py (2273 and 2612), not just one",
+    "RI-5 has FIVE completed_code storage sites in iterative.py (578, 588, 592, 665, 762) — best wiring is a _validate_and_store helper",
+    "_forge_stall_monitor is passive (only logs); my _forge_accepted_monitor goes further and transitions state (per spec). Noted in commit message."
+  ],
+  "waiting_for": "user approval to proceed to Phase 2 (RI-5 tree-sitter)",
+  "background_pids": [],
+  "next_action": "Phase 2: launch subagent 2A to write structural_check.py + tests, then (after 2A ships) subagent 2B for offline audit, then I wire into iterative.py and forge_pipeline.py and run sanity cascade",
+  "updated_at": "2026-04-13T21:15:00Z"
+}

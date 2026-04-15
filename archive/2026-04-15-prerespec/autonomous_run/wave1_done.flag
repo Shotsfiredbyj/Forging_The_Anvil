@@ -1,0 +1,9 @@
+status=complete
+outcome=partial_success
+ended_at=2026-04-14T10:30:00Z
+reason=Wave 1 complete. RI-5 + RI-3 + Phase 1 infra shipped. RI-1 reverted after validation cascade exposed allowlist design flaw + reviewer blind spot. See wave1_results.md and wave1_phase4_summary.md.
+shipped=["phase1_infra_2bf705a","phase1_infra_8230158","ri5_structural_check_0d9089f","ri3_review_instructions_61797b4"]
+reverted=["ri1_tailwind_59b70ca_reverted_by_9790968"]
+production_state_cold_anvil=9790968
+production_state_arnor_gateway=61797b4
+next_session=wave1.5 (new structural_check rules + final-grade/review-verdict disconnect investigation + devstral component rubric fragility)
