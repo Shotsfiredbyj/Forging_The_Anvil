@@ -64,7 +64,7 @@ This is exactly the mechanism of the old cascade's stages 1-3, preserved intact.
 
 Every code-gen prompt Annie issues during a build or refinement carries three first-class context blocks:
 
-1. **Stack invariants** — what the template is (Next.js 15, Tailwind v4, `@/lib/db`, etc.). Derived from the template itself, not project-specific.
+1. **Stack invariants** — what the template is (Vite + React + shadcn/ui + Tailwind v3 + Hono + `better-sqlite3` per the `AI_RULES.md` shipped in the scaffold, committed 2026-04-18). Derived from the template itself, not project-specific.
 2. **Project state** — current file tree plus the contents of files the generated code touches or depends on. Mechanical.
 3. **Creative brief** — the relevant slice of vision + voice + content strategy + architecture for this specific task.
 
@@ -215,7 +215,7 @@ Because the project is the unit (`03-spec.md` §5), the storage question is not 
 
 ### What the deployed public URL is (and isn't)
 
-When Annie publishes a project to `{project}.coldanvil.com` via `fly deploy`, only the built Next.js output and its runtime dependencies get shipped to the Fly.io app. `docs/` is markdown in the project root; Next.js does not route it; Fly's build step does not bundle it. **The user's creative docs are never publicly served on their live site.** This is a property of the deploy step that we should verify explicitly in `builder/deploy.py` (e.g. a `.flyignore` listing `docs/`) rather than relying on the framework by accident.
+When Annie publishes a project to `{project}.coldanvil.com` via `fly deploy`, only the built Vite SPA bundle (`dist/`), the Hono server, and their runtime dependencies get shipped to the Fly.io app. `docs/` is markdown in the project root; Vite does not route or bundle it; the Dockerfile's `COPY` instructions do not reference it; Fly's build step does not include it. **The user's creative docs are never publicly served on their live site.** This is a property of the deploy step that we verify explicitly in `builder/deploy.py` (`.flyignore` lists `docs/`) rather than relying on the framework by accident.
 
 ### Where projects live on Cold Anvil's infrastructure
 
@@ -234,7 +234,7 @@ Three realistic options. Only option A is built at MVP.
 ### What this means for Phase 1
 
 - `builder/scaffold.py` scaffolds into `/var/coldanvil/projects/{user_id}/{project_id}/` (configurable via env var; PoC path stays for research only).
-- `builder/deploy.py` explicitly excludes `docs/` from the Cloudflare Pages upload as belt-and-braces (belt: Next.js doesn't route markdown; braces: we still verify).
+- `builder/deploy.py` explicitly excludes `docs/` from the Fly.io deploy bundle as belt-and-braces (belt: Vite doesn't bundle non-imported markdown; braces: we still verify via `.flyignore` or equivalent).
 - No git operations in Phase 1. The project is a plain directory. Git arrives with Stage D.
 
 ---

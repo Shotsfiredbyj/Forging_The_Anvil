@@ -19,7 +19,7 @@ The codebase has four groups of code. Here is the disposition of each.
 - `pipeline/gateway_client.py` — HTTP transport for Gateway communication. `_request()`, `submit_batch()`, `poll_run()`, `fetch_outputs()`. Synchronous, stdlib-only, battle-tested. The new build loop will call Gateway differently (single-task completions, not batch submissions), but the transport and polling primitives are reusable.
 - `api/` app factory, auth (OTP + JWT), project model, database models, Alembic migrations — All stays. Email + OTP auth matches the spec exactly. The `Project` model needs new columns but the foundation is sound.
 - `site/` — coldanvil.com static site on Cloudflare Pages. Stays as is for now.
-- `Cold_Anvil/templates/nextjs-mvp/` — the committed stack template, built and verified in Phase 0. Pinned Next.js 15 + React 19 + TS strict + Tailwind v4 + better-sqlite3. `npm install` + `npm run build` clean. This is the harness Annie generates INTO; it does not get regenerated.
+- `Cold_Anvil/templates/nextjs-mvp/` — **SUPERSEDED 2026-04-18 by stack change**. Retained in-tree for reference only during the Phase 0.5 transition; scheduled for removal once `templates/vite-hono-mvp/` lands and the PoC re-run confirms PROCEED on the new stack.
 - `Cold_Anvil/scripts/poc_codegen.py` + `Cold_Anvil/scripts/poc_prompts/0{1..5}-*.md` — research infrastructure, not product code. Kept as the reference for Phase 1 scaffold/codegen patterns (parallel Gateway fan-out, sequential local builds, source-copytree + hard-link node_modules, signal-driven pre-warm, retry-with-stderr). To be archived or deleted once `builder/` lifts what it needs.
 
 **Keep as reference, substantially rework:**
@@ -49,10 +49,10 @@ The smallest slice that delivers the spec's central promise:
 
 1. Discovery conversation (existing, minor prompt updates).
 2. Annie proposes what she will build: *"I'm going to make you a one-page site with a waitlist form. I'll have something for you to look at in about five minutes."* User confirms or adjusts.
-3. Annie scaffolds a Next.js project from a committed template. The template is pre-built, version-pinned, already runs. Not generated.
-4. Annie issues code-gen tasks one at a time into the running project. Each task: generate code → write to file → run `next build` → check for errors → if errors, fix or rollback → commit. User sees a live preview URL updating as Annie works.
-5. Live preview via Next.js dev server served through a tunnel.
-6. When done, Annie publishes to `{project}.coldanvil.com` via Fly.io (decision 2026-04-17: Cloudflare Pages ruled out because edge runtime cannot run `better-sqlite3`).
+3. Annie scaffolds a Vite + React + shadcn + Hono project from the committed template. The template is pre-built, version-pinned, already runs. Not generated.
+4. Annie issues code-gen tasks one at a time into the running project. Each task: generate code → write to file → run `npm run build` → headless-browser DOM check → if errors, fix or rollback → commit. User sees a live preview URL updating as Annie works.
+5. Live preview via Vite dev server + Hono API server, fronted by a Caddy reverse proxy, served through a named Cloudflare tunnel at `<slug>.preview.coldanvil.com`.
+6. When done, Annie publishes to `{project}.coldanvil.com` via Fly.io (stack + hosting combo locked 2026-04-18 per `Research/adorable_dyad_deep_research.md` §4).
 7. User gets the URL.
 
 **NOT in the first slice:**
@@ -73,16 +73,18 @@ The smallest slice that delivers the spec's central promise:
 
 ## 3. The committed stack
 
-**Next.js 15** (App Router). **TypeScript 5.x** strict mode. **Tailwind CSS v4**. **SQLite via better-sqlite3** for the data layer (zero-config, deploys anywhere, more than enough for MVP web apps; Postgres comes in a future stack expansion). **Deployment: Fly.io** for user-generated apps (Node runtime + persistent volume + Litestream continuous replication — the only mainstream host that cleanly supports our Next.js + `better-sqlite3` combo). The `coldanvil.com` marketing site stays on Cloudflare Pages (static HTML, no runtime constraint).
+**Vite 6 + React 19 + TypeScript + Tailwind CSS v3 + shadcn/ui** as the client. **Hono** as a small API server. **SQLite via `better-sqlite3` + Litestream** for continuous replication. **Deployment: Fly.io** (one Fly app per user project; Docker image runs SPA + Hono + Litestream sidecar). The `coldanvil.com` marketing site stays on Cloudflare Pages (static HTML, no runtime constraint).
+
+**Decision 2026-04-18 (stack change).** Previously this spec committed to Next.js. After the architectural read of Adorable + Dyad (`Research/adorable_dyad_deep_research.md` §4), we're switching. The base template is lifted from Dyad's open-source scaffold (Apache-2.0), stripped of Dyad branding, rewired for Fly + Hono + SQLite + Litestream.
 
 Justification:
-- Next.js is the convergent choice across every production AI builder (v0, Bolt, Lovable). Best-understood web framework by current LLMs.
-- Tailwind eliminates the CSS-class-mismatch problem that destroyed every cascade we ran (the spec traces this directly in `01-journey.md`).
-- TypeScript gives us type checking as a build-time verification gate.
-- SQLite removes "you need a database server" deployment complexity for the user's product.
-- Fly.io for user-app hosting because it is the only mainstream managed host that supports our exact stack — Node runtime with persistent disk + Litestream for continuous SQLite replication. Cloudflare Pages is still our choice for the static marketing site at `coldanvil.com`; user apps go to Fly.
+- **Vite + Hono fits Fly + SQLite + Litestream without fighting framework defaults.** Next.js assumes serverless / horizontal scaling; Litestream requires single-writer single-machine-at-a-time. Running Next.js on Fly with `min_machines_running = 1` is fighting the framework. Vite SPA + Hono separation is native to this architecture.
+- **Simpler scaffold for smaller fleet models.** No server/client component boundary, no runtime pinning (`runtime: 'nodejs'` everywhere), no Turbopack native-module gotchas. Our Gemma4-31b primary + Qwen3.5-27b backup will produce working code more reliably on the simpler scaffold.
+- **In-repo `AI_RULES.md` ships with the scaffold** — a 20-rule LLM-facing contract telling the model where new components go, which libraries are pre-installed, and what not to edit. Composes natively with our `docs/`-as-memory commitment (`respec/07-creative-memory.md`).
+- **shadcn/ui + Tailwind + React is the convergent choice** across every post-2025 AI builder. Frontier and mid-sized models both handle this stack fluently.
+- **Visual edit (click-to-select-in-preview) depends on a Vite plugin.** Dyad's `@dyad-sh/react-vite-component-tagger` is 90 lines, Apache-2.0, and is the highest-leverage steal in the research. Achievable on webpack too but less mature.
 
-The template lives at `templates/nextjs-mvp/`. A working Next.js 15 + TypeScript + Tailwind v4 + SQLite app with a hello-world landing page, root layout, config files, and pinned dependencies. `npm run build` succeeds out of the box. Annie generates INTO this. She never generates FROM scratch.
+The template lives at `templates/vite-hono-mvp/` (replaces the removed `templates/nextjs-mvp/`). A working Vite + React + shadcn/ui + Hono + SQLite + Litestream app with an idle landing page, root layout, Dockerfile, `fly.toml`, pinned dependencies, and an in-repo `AI_RULES.md`. `npm run build` + `npm run dev` both succeed out of the box. Annie generates INTO this. She never generates FROM scratch.
 
 ---
 
@@ -91,10 +93,10 @@ The template lives at `templates/nextjs-mvp/`. A working Next.js 15 + TypeScript
 | # | Tool | Status | What it is | Estimate |
 |---|------|--------|-----------|----------|
 | 1 | **Conversation** | EXISTING — adapt | `api/services/conversation.py` + supporting modules. Extend phases to include `build_planning`. Update Annie's system prompt for the conversation→build transition. | 2 days |
-| 2 | **Stack (scaffolder)** | NEW | `builder/scaffold.py`. Copies the template, runs `npm install`, runs `npm run build` to verify. Pure file operations + subprocess. Template itself needs careful construction. | 1 day (module) + 2 days (template) |
-| 3 | **Code-gen** | NEW — critical path | `builder/codegen.py`. Takes project state + task description. Calls Gateway. Writes result to disk. Runs verification. Returns success/failure. The replacement for old Stage 5, reimagined as single-file tool calls. New prompt: `forge/prompts/annie_codegen.md`. | 5 days |
-| 4 | **Live preview** | NEW | `builder/preview.py`. Starts `next dev`, exposes via a **named Cloudflare tunnel** at `<slug>.preview.coldanvil.com` (decision 2026-04-17). Caddy reverse proxy routes hostname → correct per-project dev port. Manages process lifecycle. | 2 days (down from 3 — Cloudflare account + DNS plumbing already exists for `coldanvil.com`) |
-| 5 | **Refinement** | DEFERRED | Thin wrapper around code-gen for targeted edits from user requests. | 3 days (after code-gen proven) |
+| 2 | **Stack (scaffolder)** | RE-DO on new stack | `builder/scaffold.py` (module stays — template-agnostic). Target template moves from `templates/nextjs-mvp/` to `templates/vite-hono-mvp/` (Dyad fork + Hono + Litestream). | 0.25 days (module adjust) + 1.5 days (new template from Dyad scaffold) |
+| 3 | **Code-gen** | PARTIALLY RE-DO | `builder/codegen.py` core + retry loop survives. `forge/prompts/annie_codegen.md` rewritten for new stack's conventions. PoC prompts re-run against new stack to re-verify fleet capability. | 1.5 days (prompt + re-verify) |
+| 4 | **Live preview** | NEW | `builder/preview.py`. Starts `npm run dev` (Vite), exposes via a **named Cloudflare tunnel** at `<slug>.preview.coldanvil.com`. Caddy reverse proxy routes hostname → correct per-project dev port. Manages process lifecycle. Vite's HMR over the tunnel is naturally quicker than Next's Turbopack-based HMR. | 2 days |
+| 5 | **Refinement** | DEFERRED (Phase 3.5 visual-edit extension) | Thin wrapper around code-gen for targeted edits from user requests. Phase 3.5 adds click-to-select in preview (Dyad's component-tagger + proxy-injected selector — see `Research/adorable_dyad_deep_research.md` §3). | 3 days core + 5 days visual-edit (Phase 3.5) |
 | 6 | **Deployment** | NEW | `builder/deploy.py`. `fly deploy` against a per-project Fly.io app. Wildcard DNS `*.coldanvil.com` → Fly edge. Litestream config per app for continuous SQLite replication. | 2 days + 1 day infra setup |
 | 7 | **Portability** | DEFERRED | Zip project directory, serve as download. | 1 day |
 | 8 | **Memory** | EXISTING — sufficient for first slice | Project model already stores `extraction_state` and `conversation_history` as JSONB. Cross-session memory deferred. | 0 days (first slice) / 3 days (full) |
@@ -107,32 +109,44 @@ The template lives at `templates/nextjs-mvp/`. A working Next.js 15 + TypeScript
 
 Critical path: **Template → Scaffold → Code-gen → Verification → Preview → Orchestrator → Conversation bridge → Deployment**
 
-### Phase 0: Foundation — COMPLETE 2026-04-17
+### Phase 0: Foundation — COMPLETE on Next.js 2026-04-17; SUPERSEDED by stack change 2026-04-18
 
-- **0.1** ✓ Next.js MVP template built and verified. `Cold_Anvil/templates/nextjs-mvp/`. `npm install` + `npm run build` clean. Runtime render validated.
+- **0.1** ✓ (on Next.js) Next.js MVP template built and verified. Template is retained for reference only; new template replaces it in Phase 0.5.
 - **0.2** Deferred — DB column migration (Project.build_state, Project.project_dir) not required until Phase 4 conversation bridge.
-- **0.3** ✓ `Cold_Anvil/scripts/poc_codegen.py` + prompts built as the proof-of-concept substitute for stub `builder/`. Actual `builder/` package gets created in Phase 1.
-- **0.4** ✓ PoC verdict: **PROCEED**. 5/5 primary, 3/5 swap passed. Gemma4-31b as primary, qwen3.5-27b as backup. Full results + learnings captured in `Cold_Anvil/BUILDING.md`.
+- **0.3** ✓ `Cold_Anvil/scripts/poc_codegen.py` + prompts built as the proof-of-concept substitute for stub `builder/`. Prompts are Next.js-specific; rewritten for Vite + React in Phase 0.5.
+- **0.4** ✓ PoC verdict: **PROCEED on Next.js**. 5/5 primary, 3/5 swap passed. Fleet capability validated; stack choice revisited after Adorable + Dyad research.
 
-### Phase 1: Scaffold + Verify (3 days) — next up
+### Phase 0.5: Stack swap to Vite + React + shadcn/ui + Hono (4 days) — NEW, in progress 2026-04-18
 
-- **1.1** Implement `builder/scaffold.py`. Copy template, `npm install`, `npm run build`, return success/failure. Also creates `docs/` with placeholder READMEs for the four creative artefacts (per `respec/07-creative-memory.md` §8). (1 day)
-  - **Lift from `scripts/poc_codegen.py` — `copy_template_to_scratch()`**: source files go through `shutil.copytree` (true copy, independent inodes). **Only `node_modules/` is hard-linked** via `cp -al`. This is non-negotiable: Python's `open(path, "w")` truncates shared inodes, so hard-linking source files cascades edits across every scratch and back into the template. The PoC's first full run failed 4/5 for this reason before the fix.
-- **1.2** Adapt verification to work against a live Next.js project. `npm run build` (invokes tsc + next build) as the primary signal. Create `builder/verify.py`. Layer 2 behavioural probes (Playwright) start here, deferred from Phase 0. (2 days)
-- **1.3** End-to-end test: scaffold → verify → passes clean. Confirm `docs/` is present with placeholders.
+*Grounded in `Research/adorable_dyad_deep_research.md` §4.6. What survives vs. what gets rebuilt:*
 
-*1.1 and 1.2 run in parallel. 1.3 depends on both.*
+| Survives | Rebuilt |
+|---|---|
+| `builder/verify.py` — `npm run build` signal is stack-agnostic | `templates/nextjs-mvp/` → `templates/vite-hono-mvp/` (Dyad fork + Hono + Litestream + Dockerfile + fly.toml) |
+| `builder/codegen.py` core + retry wrapper + rollback | `scripts/poc_prompts/` — rewritten as Vite + shadcn versions; PoC re-run on new stack |
+| `builder/creative.py` — slicing is stack-agnostic | `forge/prompts/annie_codegen.md` — rewritten around shadcn + Tailwind v3 + Hono API conventions |
+| All architecture commitments, hosting decisions, creative framework | 2-3 tests that reference Next.js file paths |
 
-### Phase 2: Code-gen loop (5 days) — CRITICAL PATH
+- **0.5.1** Fork Dyad's scaffold (`templates/vite-hono-mvp/`). Strip `@dyad-sh/react-vite-component-tagger`, Dyad-branded landing, `made-with-dyad.tsx`, `components.json` css-path mismatch. Keep shadcn/ui (49 components pre-installed), Tailwind v3, react-router-dom, react-hook-form + zod, react-query. Add Hono server with one example endpoint writing to SQLite. Add Dockerfile running SPA + Hono + Litestream sidecar. Add `fly.toml`. Add `.env.example`. Tighten TS (strict for our code, loose for Annie's). Author `AI_RULES.md` in Dyad's style but targeted at Annie's conventions. (1.5 days)
+- **0.5.2** Re-run the Phase 0 PoC against the new template. Rewrite prompts 01-05 as Vite + shadcn versions. Run each primary + swap through the Gateway. Re-establish PROCEED verdict against the new stack. (1 day)
+- **0.5.3** Rewrite `forge/prompts/annie_codegen.md` to reference the Vite + shadcn + Hono stack, the in-repo `AI_RULES.md` contract, and the new file layout conventions. (0.5 days)
+- **0.5.4** Update `builder/scaffold.py`'s template path constant, re-test scaffold + verify end-to-end on the new template. (0.25 days)
+- **0.5.5** Update `tests/test_builder_{scaffold_verify,e2e}.py` where they reference Next.js paths or task descriptions. Keep all stack-agnostic assertions. (0.25 days)
+- **0.5.6** Author `builder/verify.py` DOM-sanity extension per `respec/03-spec.md` §8.3 — headless-browser check that the rendered page contains the expected change, not just that build succeeded. (0.5 days)
 
-- **2.1** Implement `builder/codegen.py`. Prompt template with three first-class context blocks: **stack invariants**, **project state** (file tree + dependent file contents), **creative-brief** (slice of vision/voice/content-strategy/architecture per `respec/07-creative-memory.md` §5). Gateway call, parse response, write to disk, run verify. (3 days)
-  - **Signal-driven readiness pattern (lift from `poc_codegen.py`)**: pre-warm each fleet model with `max_tokens=1` probe; 200 IS the readiness signal. Client timeout set to `330s` (backstop above llama-swap's 300s `healthCheckTimeout`). Never guess shorter timeouts. See `Cold_Anvil/BUILDING.md` learning #4 and `FORGE-OPERATIONS.md` §76-91.
-  - **Anti-ORM anchor is mandatory** in any DB-adjacent prompt. Phase 0 showed training priors beat stack invariants — primary prompts using `better-sqlite3` correctly drifted to Drizzle-style `db.select().from(...)` on swap vehicles. Every DB-adjacent prompt must include an explicit negative constraint ("Do not use an ORM. Raw SQL only. `db.prepare().all()` / `.get()` / `.run()`") plus a worked example in the committed idiom.
-  - **`creative_context` parameter is not optional** in the codegen API surface. Empty value is allowed (fresh project, no artefacts yet), but the parameter must always be present. Guards against drift toward generic SaaS output on projects that do have a voice.
-- **2.2** Retry-with-error-context loop. 3 retries max, rollback on exhaustion, backup-model fallback (qwen3.5-27b) on final retry. (1 day)
-  - **Retry-with-stderr is not optional** — it recovered 2 of 5 Phase 0 capabilities. TypeScript strict catches errors the model misses on first pass; feeding stderr back into the prompt is load-bearing.
-- **2.3** Test with concrete scenario: scaffold → add landing page → add second page → add nav component. Each step verifies. Each prompt carries a creative-brief slice. (1 day)
-- **2.4** Write `forge/prompts/annie_codegen.md` — dramatically simpler than old `file_generation.md` because the model edits a project that already works. Based on Phase 0's five PoC prompts; preserve their structure (CRITICAL OUTPUT CONSTRAINT at top, STACK INVARIANTS with Tailwind v4 / better-sqlite3 anti-patterns called out, PROJECT CONTEXT, WORKED EXAMPLE, TASK, FORBIDDEN, OUTPUT FORMAT).
+### Phase 1: Scaffold + Verify — RE-COMPLETED as part of Phase 0.5
+
+Phase 1's scaffold + verify were already built and tested on Next.js (2026-04-17). Phase 0.5 retargets the same modules at the new template and extends verify with the DOM-sanity check per §8.3. No new module work; rebuild + re-test only.
+
+### Phase 2: Code-gen loop — core COMPLETED on Next.js 2026-04-17; prompt rewritten as part of Phase 0.5
+
+Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup model) are built, tested, and stack-agnostic. The prompt template `forge/prompts/annie_codegen.md` is being rewritten under Phase 0.5.3 for the new stack. Phase 2.3 end-to-end test re-runs against the new template under Phase 0.5.5.
+
+**Phase-0 lessons carried forward unchanged:**
+- Signal-driven readiness pattern (`max_tokens=1` pre-warm; 200 IS the readiness signal; 330s httpx backstop above llama-swap's 300s). Retained.
+- Retry-with-stderr is not optional. Retained.
+- `creative_context` parameter is mandatory in the codegen API even when empty. Retained.
+- Anti-ORM anchor is mandatory in DB-adjacent prompts. **Updated:** with Hono owning the DB layer, the anchor now targets Hono routes (raw `db.prepare(sql).all/get/run()` inside handlers, not Drizzle / Prisma / Kysely).
 
 ### Phase 2.5: Creative artefact production (4 days) — new, per `respec/07-creative-memory.md`
 
@@ -142,13 +156,25 @@ Critical path: **Template → Scaffold → Code-gen → Verification → Preview
 - **2.5.4** Slicing API — `creative.slice(artefact, task_type)` returns the creative-brief block for a given code-gen task. Slicing heuristics locked in `respec/07-creative-memory.md` §10 (calibrated 2026-04-17). (0.5 day)
 - **2.5.5** UI surface — Stage B per `respec/07-creative-memory.md` §11 (calibrated 2026-04-17): inline-in-chat + docs panel listing the four artefacts read-only. Stage C (inline editor) and Stage D (history/diff) come later; both are additive UI, the disk representation is unchanged. (1 day for Stage B)
 
-### Phase 3: Preview + Orchestrator (4 days, partially parallel with Phase 2)
+### Phase 3: Preview + Orchestrator (4 days, partially parallel with Phase 0.5)
 
-- **3.1** Implement `builder/preview.py`. Per-project `next dev` subprocess on an allocated port, fronted by a Caddy reverse proxy that routes `<slug>.preview.coldanvil.com` → the right port. Named Cloudflare tunnel from our deploy host to `*.preview.coldanvil.com`. Process lifecycle + orphan cleanup. *Can start as soon as scaffold works (Phase 1).* (2 days — reduced from 3 because Cloudflare account + DNS management for `coldanvil.com` already exists, so the plumbing is mostly configuration.)
-- **3.2** Implement `builder/orchestrator.py`. The build loop: read extraction state → plan tasks → execute code-gen calls one by one → verify each → update preview → report to user. *Depends on Phase 2.* (3 days)
+- **3.1** Implement `builder/preview.py`. Per-project `npm run dev` (Vite) subprocess on an allocated port, plus the Hono API server on a sibling port, fronted by a Caddy reverse proxy that routes `<slug>.preview.coldanvil.com` → the right ports. Named Cloudflare tunnel from our deploy host to `*.preview.coldanvil.com`. Process lifecycle + orphan cleanup. *Can start as soon as the new template works (Phase 0.5).* (2 days)
+- **3.2** Implement `builder/orchestrator.py`. The build loop: read extraction state → plan tasks → execute code-gen calls one by one → verify each → update preview → report to user. *Depends on Phase 2 core.* (3 days)
 - **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>.preview.coldanvil.com` loads the current state.
 
-*3.1 runs in parallel with Phase 2. 3.2 depends on Phase 2.*
+*3.1 runs in parallel with Phase 0.5 + Phase 2.5. 3.2 depends on Phase 2 core.*
+
+### Phase 3.5: Visual edit (5 days) — NEW per `Research/adorable_dyad_deep_research.md` §3; POST-MVP
+
+Click-an-element-in-the-preview-and-have-the-model-edit-the-right-file. Dyad's open-source mechanism, five pieces:
+
+- **3.5.1** Fork `@dyad-sh/react-vite-component-tagger` → `@coldanvil/react-vite-component-tagger`. Apache-2.0, 90 lines, rename `data-dyad-*` → `data-anvil-*`. Ships in the Vite config of the template. (0.5 days)
+- **3.5.2** Proxy server between the preview iframe and the user's Vite dev server. Lifts Dyad's `worker/proxy_server.js` pattern — detects HTML responses, injects five scripts into `<head>` (component selector, bridge, hover highlighter, click handler, postMessage relay). (2 days)
+- **3.5.3** Preview iframe handler that parses `data-anvil-id="file.tsx:line:col"` and drops it into Annie's "selected components" state. (1 day)
+- **3.5.4** Prompt assembler addition: when the user sends a message with selected components, append a `Selected components:` block containing the file path and a 5-line source snippet with `// <-- EDIT HERE`. (0.5 days)
+- **3.5.5** End-to-end test: open preview, click an element, type "make this green", confirm the right file gets edited. (1 day)
+
+Ships after Phase 6 polish. Not blocking MVP.
 
 ### Phase 4: Conversation bridge (3 days)
 
@@ -168,7 +194,7 @@ Critical path: **Template → Scaffold → Code-gen → Verification → Preview
 - **6.2** Error handling: Gateway down, build failures after retries, tunnel failures. Annie responds gracefully. (1 day)
 - **6.3** Cleanup: process management, disk cleanup, logging. (1 day)
 
-**Total: ~26 working days / ~5-6 weeks for one engineer** (was 22; +4 for the creative artefact module introduced by `respec/07-creative-memory.md`).
+**Total MVP: ~26 + 4 = ~30 working days / ~6 weeks for one engineer** (+4 for Phase 0.5 stack swap). Phase 3.5 visual edit adds 5 more days post-MVP.
 
 ---
 
@@ -181,8 +207,11 @@ Critical path: **Template → Scaffold → Code-gen → Verification → Preview
 - Export / download UI
 - Payment / Stripe integration
 - Custom domains
-- Multiple stacks (only Next.js + TS + Tailwind + SQLite)
+- Multiple stacks (only Vite + React + shadcn/ui + Hono + SQLite at MVP)
 - Backend-heavy products (APIs, data processing, ML)
+- Visual edit / click-to-select in preview (Phase 3.5, post-MVP)
+- Import of existing projects (explicit non-feature per `respec/03-spec.md` §4)
+- Generation of legal or compliance documents (explicit non-feature per `respec/03-spec.md` §4; post-MVP extension)
 - Standalone eval product
 - Vision document as standalone creative artefact
 - Playwright visual review
@@ -192,11 +221,13 @@ Critical path: **Template → Scaffold → Code-gen → Verification → Preview
 
 ---
 
-## 7. The riskiest assumption — ANSWERED 2026-04-17
+## 7. The riskiest assumption — ANSWERED on Next.js 2026-04-17; RE-VERIFYING on Vite under Phase 0.5
 
-**Original question:** Can sub-40B models on our Arnor Gateway fleet reliably generate correct TypeScript + TSX code into a Next.js project, one file at a time, with the project context in the prompt?
+**Original question:** Can sub-40B models on our Arnor Gateway fleet reliably generate correct TypeScript + TSX code into a modern React project, one file at a time, with the project context in the prompt?
 
-**Verdict: PROCEED.**
+**Verdict on Next.js (2026-04-17): PROCEED.** 5/5 primary, 3/5 swap. Answered on the old stack.
+
+**Stack change 2026-04-18:** The fleet has not yet been verified on Vite + React + shadcn + Hono. The architectural shift should make the fleet's job *easier* (no RSC boundary, no runtime pinning, no Turbopack native-module issues) so we expect equal-or-better pass rates. Phase 0.5.2 re-runs all five PoC capabilities against the new stack before Phase 3 begins. A PROCEED verdict on the new stack is a precondition for Phase 3; a regression below 4/5 primary triggers escalation.
 
 The Phase 0 PoC ran five capability prompts (interactive, list, API, dynamic route, multi-file schema), each with a primary and a swap vehicle. Gemma4-31b produced working Next.js 15 + TypeScript + Tailwind v4 + better-sqlite3 code on 5 of 5 primaries (one needed a retry) and 3 of 5 swaps. Full results + artefacts in `Cold_Anvil/BUILDING.md`.
 
@@ -219,7 +250,7 @@ The Phase 0 PoC ran five capability prompts (interactive, list, API, dynamic rou
 | `api/routes/conversation.py` | WebSocket endpoint bridging conversation to build; `confirm_generation` is the pivot |
 | `pipeline/adapters/web.py` | Web verification adapter; adapt from "validate extracted files" to "run `npm run build`" |
 | `api/models/project.py` | Project model; needs `build_state` and `project_dir` columns |
-| `Cold_Anvil/templates/nextjs-mvp/` | ✓ Built Phase 0. The committed stack template. Most important single artefact. |
+| `Cold_Anvil/templates/vite-hono-mvp/` | Phase 0.5 build (in progress). Dyad scaffold fork + Hono + SQLite + Litestream + Dockerfile + fly.toml + `AI_RULES.md`. Replaces the superseded `templates/nextjs-mvp/`. |
 | `Cold_Anvil/scripts/poc_codegen.py` + `scripts/poc_prompts/` | ✓ Built Phase 0. Reference source for the Phase 1/2 scaffold and codegen patterns (source-copytree, hard-link node_modules, signal-driven pre-warm, retry-with-stderr). Archive/delete when Phase 1 lifts what it needs. |
 | `builder/codegen.py` | NEW — single-file code generation inside a live project. Critical path. Takes project state + task + creative-brief. |
 | `builder/creative.py` | NEW — creative artefact production + slicing. Per `respec/07-creative-memory.md`. |
