@@ -2,11 +2,15 @@
 
 # Fleet Strategy: Rohan Integration
 
-> **SUPERSEDED (2026-04-05):** Rohan now runs vLLM behind llama-swap
-> (not Ollama). Two llama-swap instances: port 8080 (Pro 6000, GPU 0)
-> and port 8081 (Pro 4500, GPU 1). See `Cold_Anvil/docs/DECISIONS.md`
-> (2026-04-04 entry) for migration details. The dual-GPU architecture
-> below is still correct, but all Ollama references are historical.
+> **Historical planning doc — partial refresh 2026-04-17.**
+> Rohan was built 2026-03-31; the dual-GPU architecture and routing
+> narrative here reflect the original plan and are still broadly
+> accurate. Since 2026-04-05, Rohan runs vLLM behind llama-swap (not
+> Ollama): port 8080 on the Pro 6000, port 8081 on the Pro 4500. Model
+> lists in this document have been refreshed to match Arnor_Gateway
+> `fleet.py`. For current ground truth, query `fleet.py` or
+> `http://elostirion:8400/fleet/hosts` — this document is a reference,
+> not the source of truth.
 
 ## Context
 
@@ -41,36 +45,37 @@ dedicated inference.
 
 ## Rohan GPU Configuration
 
-### Default Mode: Two Ollama Instances
+### Current Backend: Two vLLM Instances Behind llama-swap
 
-Same proven pattern as Eregion. Two separate Ollama processes, each
-bound to one GPU via CUDA_VISIBLE_DEVICES.
+Since 2026-04-05, Rohan runs vLLM served by llama-swap rather than Ollama.
+The dual-GPU layout is the same — two backends, one per GPU via
+CUDA_VISIBLE_DEVICES.
 
 | Instance | GPU | Port | VRAM | Role |
 |----------|-----|------|------|------|
-| rohan (primary) | Pro 6000 MaxQ | 11434 | 96GB | 120B models, generation, rewrite |
-| rohan-b (secondary) | Pro 4500 | 11435 | 32GB | 27-35B models, review, counter-review |
+| rohan (primary) | Pro 6000 MaxQ | 8080 | 96GB | 120B+ models, generation, rewrite |
+| rohan-4500 (secondary) | Pro 4500 | 8081 | 32GB | 27–35B models, review, counter-review |
 
-Two systemd units: `ollama-primary.service` and `ollama-secondary.service`
-with separate CUDA_VISIBLE_DEVICES, ports, and model directories.
+Two systemd units — llama-swap instances with separate CUDA_VISIBLE_DEVICES,
+ports, and model caches.
 
-**Advantages:** Independent model loading, no interference, proven pattern,
-can run generation on one GPU while review runs on the other simultaneously.
+**Advantages:** Independent model loading, no interference, on-demand model
+swap managed by llama-swap, generation on one GPU while review runs on the
+other simultaneously.
 
-### Fine-Tuning Mode: Single Ollama Instance (Manual Switch)
+### Fine-Tuning Mode: Stop Both vLLM Instances
 
-When fine-tuning, stop both Ollama services and run Unsloth/training
-directly. No Ollama involvement — training frameworks manage GPU memory
-themselves. Document the switch procedure:
+When fine-tuning, stop both llama-swap instances and run Unsloth/training
+directly. No inference backend involvement — training frameworks manage
+GPU memory themselves. Switch procedure:
 
-1. Stop both Ollama services
+1. Stop both llama-swap services
 2. Remove Rohan from Gateway fleet (or mark as down)
 3. Run training job (Unsloth + QLoRA on the 96GB card, or across both)
-4. When done, restart Ollama services
+4. When done, restart llama-swap services
 5. Gateway health checks will pick Rohan back up automatically
 
-No need for a "single Ollama" mode — inference uses dual-instance,
-training bypasses Ollama entirely.
+Inference uses dual-instance llama-swap; training bypasses it entirely.
 
 ---
 
@@ -81,24 +86,26 @@ training bypasses Ollama entirely.
 **Pro 6000 MaxQ (96GB) — the heavy hitter:**
 - qwen3.5:122b (creative generation, rewrite)
 - gpt-oss:120b (code generation)
-- devstral-2:123b (code generation alternative)
-- qwen3-coder-next (code generation)
+- Full sub-32GB roster also loaded for parallel forge work:
+  qwen3.5:35b, qwen3.5:27b, qwen3.5:9b, gpt-oss:20b, gemma4:31b,
+  gemma4:26b, mistral-small3.2:24b, devstral-small-2:24b
 - Any future 70B+ models
 
 **Pro 4500 (32GB) — review and mid-tier generation:**
-- qwen3.5:35b (generation)
-- gemma3:27b (review)
-- mistral-small3.2:24b (review)
-- nemotron-cascade-2:30b (generation)
-- gpt-oss:20b (generation, specialist)
+- qwen3.5:35b, qwen3.5:27b, qwen3.5:9b
+- gemma4:31b, gemma4:26b
+- gpt-oss:20b
+- mistral-small3.2:24b
+- devstral-small-2:24b
 
 ### Annuminas (32GB — down from 96GB)
 
 Annuminas becomes a lighter-duty node. Same model roster as Anduril:
-- qwen3.5:35b (creative/code generation)
-- gemma3:27b (review)
-- mistral-small3.2:24b (review)
-- gpt-oss:20b (code generation)
+- qwen3.5:35b, qwen3.5:27b, qwen3.5:9b
+- gemma4:31b, gemma4:26b
+- gpt-oss:20b
+- mistral-small3.2:24b
+- devstral-small-2:24b
 
 Can no longer run any 120B+ models. This is fine — Rohan handles those.
 Annuminas remains Jack's primary workstation with DaVinci Resolve on the
@@ -107,16 +114,17 @@ same GPU, so inference contention is expected during editing sessions.
 ### Anduril (32GB — unchanged)
 
 Same as now:
-- qwen3.5:35b (generation)
-- gemma3:27b (review)
-- mistral-small3.2:24b (review)
-- gpt-oss:20b (generation)
+- qwen3.5:35b, qwen3.5:27b, qwen3.5:9b
+- gemma4:31b, gemma4:26b
+- gpt-oss:20b
+- mistral-small3.2:24b
+- devstral-small-2:24b
 
 ### Barrowblade (96GB shared — unchanged, key fallback)
 
-Same as now:
+Gateway-routed roster:
 - gpt-oss:120b (code)
-- qwen3-next:80b (creative)
+- qwen3.5:122b (creative/both)
 - gemma3:27b (review)
 
 **Critical fallback role:** Only non-Rohan host that can run 120B models.
