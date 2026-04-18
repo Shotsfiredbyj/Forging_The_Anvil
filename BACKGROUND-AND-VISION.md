@@ -281,7 +281,78 @@ For the agentic architecture — how Annie evolves from a single conversation
 step to an always-on partner backed by specialist agents, with graduated
 autonomy and goal-backward verification — see [AGENTIC-VISION.md](AGENTIC-VISION.md).
 
+## Cold Anvil as a Studio
+
+The pipeline is the engine. It's not the whole company.
+
+Cold Anvil's long-term shape is a studio — a parent brand that builds
+products, some for external customers and some for its own verticals, with
+craft accumulated along the way spilling out as standalone tools and an
+accelerator cohort running alongside. Four strands flow from the same
+engine.
+
+**The customer product.** The pipeline-as-a-service described above — small
+enterprises, founders, and technical teams using Cold Anvil to turn ideas
+into shippable output. This is what ships first and remains the commercial
+spine.
+
+**Sub-brands.** Verticals built on Cold Anvil's platform, each with its own
+product surface, positioning, and domain knowledge, but sharing the
+pipeline, eval, and pack infrastructure underneath. Two are in motion
+below: **Fourth Age** for content creators, and **Nellie** (working
+name) for clinical decision support in functional medicine. Over time
+the studio can stand up additional verticals wherever a market has a
+distinctive domain, a quality bar Cold Anvil's eval can encode, and an
+audience that wouldn't respond to the parent brand directly.
+
+**Side tools.** Standalone artefacts — free open source or cheap paid
+releases, five dollars framed as a donation rather than a license — that
+solve a specific problem for other builders and carry the Cold Anvil brand
+into developer communities the parent brand doesn't reach directly.
+
+**The accelerator.** A limited-cohort program for founders building AI
+products — and Cold Anvil's answer to the tagline *"AI Products, for
+everyone."* Subscription tiers serve people with budget; the accelerator
+serves people with ambition and a real idea. Selection is competitive,
+founders pay nothing upfront, and Cold Anvil takes a small equity slice
+(advisor-style common stock, typically one to two percent) in exchange for
+software access, cohort community, and structured coaching from a qualified
+executive coach (Henley Business School, UK) who is also a senior product
+builder. Reach is carried through selectivity, not affordability — anyone
+can apply, and the program's value sits in who gets picked and what they
+build together. Cohort size stays deliberately small so the coaching is
+real.
+
+*Time Wizard* is the working example. The temporal reasoning research
+(`Research/timeanalysis.md`) shows LLM agents mis-estimate durations, pick
+arbitrary timeouts, and reflex-generate time-of-day artefacts — and that
+current fixes are harness-level hacks. A clean drop-in middleware giving
+agent systems real time sense — on-demand clock, structured process
+objects with rate and ETA, forced throughput reasoning before any timeout
+— fills an open niche. The same pattern applies to other craft off-cuts
+from Cold Anvil's own work: they become small tools, carry the brand, and
+prove the engineering depth behind the product.
+
+**Why this shape works.** The pipeline is reusable by definition — the
+Fourth Age mapping below demonstrates that any vertical can ride on top
+of it. Craft accumulates: rubrics, gates, patterns, and solutions to
+problems like temporal grounding are portable artefacts, not one-off
+code. And a studio lets Cold Anvil serve audiences the parent brand can't
+reach directly — content creators through sub-brands, developers through
+side tools — without diluting the positioning of the customer product.
+
+**What this doesn't change.** Nothing about what ships first. The current
+spec (`respec/03-spec.md`) is the customer product and remains the
+critical path. Sub-brands, side tools, and the accelerator sequence after the customer
+product is in motion — bandwidth, not brand permission, sets the order. This section names the shape of the
+company so decisions made now — brand language, domain boundaries, what
+counts as "in scope" — are consistent with where it's heading.
+
 ## Cold Anvil as the Engine Behind The Fourth Age
+
+Fourth Age is the studio's first sub-brand — a worked example of the
+pattern above.
+
 
 The Fourth Age (fourthage.ai) is an AI creative partner for content creators —
 initially YouTube. A creator brings an idea at any stage of maturity (a
@@ -391,3 +462,74 @@ This creates a virtuous cycle:
 The Fourth Age is where Cold Anvil proves it's not just internal tooling
 that happened to get a SaaS wrapper. It's where the platform meets a real
 customer with real quality requirements and real money on the line.
+
+## Cold Anvil as the Engine Behind Nellie
+
+Nellie (working name; .com and .ai domains TBD) is the studio's second
+sub-brand — clinical decision support software for functional medicine
+clinics. It originated as a demo built for an interview at Neko Health
+that didn't result in an offer, and has since evolved into a B2B product
+hypothesis in its own right.
+
+### The wedge
+
+Functional medicine consultations typically run 60–90 minutes and cost
+£200–500+, partly because so much of the clinician's time goes into data
+synthesis — reviewing labs, intake forms, food and sleep logs, prior
+history. The 1:1 time with the patient is what makes the experience
+valuable; the data-wrangling around it is the bottleneck.
+
+Nellie compresses the data-synthesis layer — ingesting lab PDFs, intake
+forms, app exports, and prior records, and producing a structured draft
+clinical narrative the practitioner reviews and finalises. The clinician
+keeps the dedicated 1:1 time; the gruntwork moves to Nellie. With a
+qualified practitioner in the loop interpreting the output, the product
+sits in clinical decision support territory under both MHRA and FDA — a
+materially lighter regulatory pathway than direct-to-patient
+interpretation.
+
+### Why this maps onto Cold Anvil's pipeline
+
+Strict quality requirements, structured outputs, opinionated rubrics, and
+a human-in-the-loop reviewer — this is exactly the shape Cold Anvil's
+pipeline is built for. The mapping is direct:
+
+| Nellie need | Cold Anvil component |
+|-------------|---------------------|
+| Generate draft clinical narrative from labs + intake + history | **Pipeline** — prompt template with patient context variables, routed to a clinically-tuned generator |
+| Score narrative against clinical accuracy and framework adherence | **Eval** — rubric-based model-as-judge with weighted dimensions (factual accuracy, framework consistency, hedge-on-uncertainty, source citation) |
+| Reject narratives that miss required sections or exceed scope | **Gates** — section presence, scope flags, deterministic structural checks |
+| Rewrite weak sections with clinician feedback in context | **Pipeline Phase 3** — same rewrite mechanism as the customer product |
+| Hard-block outputs that breach scope (diagnosis claims, prescription suggestions) | **Gates** — scope flags as fail-fast checks before review |
+| Support practitioner-specific interpretive frameworks (Kresser, Bredesen, IFM) | **Pack format** — framework-specific config packs with their own rubrics, anchored prompts, and gates |
+
+The framework-variance issue maps especially well onto packs. Different
+practitioners working from different frameworks load different packs —
+same pipeline, different rubric anchors and prompt templates. The
+clinician picks their pack the way a developer picks a stack.
+
+### What's still open
+
+The product hypothesis is unvalidated. Before more building:
+
+- 10–15 customer discovery conversations with functional medicine
+  clinicians, anchored on 2heal.se as the warm-intro starting point.
+- Map the actual workflow — where Nellie sits in the consultation cycle,
+  what surfaces it appears on, what the clinician's day-of-appointment
+  screen looks like with Nellie in it.
+- Surface real willingness-to-pay and the budget shape (per-seat?
+  per-encounter? hybrid?).
+- Find the *single biggest* time-sink to wedge into for v1, rather than
+  trying to be the full clinical assistant from day one.
+
+Naming is also open. "Nellie" originated as a wink at Neko Health and
+loses its load-bearing meaning as a Cold Anvil Studios sub-brand. The
+working name persists until a new one wins on its own merits and has the
+.com and .ai domains available.
+
+### Why this matters for Cold Anvil
+
+Nellie pressure-tests the studio model in a domain that's the opposite
+of Fourth Age in nearly every dimension — B2B not B2C, clinical not
+creative, slow institutional sales not consumer signup, regulated not
+open. If Cold Anvil's pipeline can power both, it can power most things.
