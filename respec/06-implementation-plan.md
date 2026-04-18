@@ -51,7 +51,7 @@ The smallest slice that delivers the spec's central promise:
 2. Annie proposes what she will build: *"I'm going to make you a one-page site with a waitlist form. I'll have something for you to look at in about five minutes."* User confirms or adjusts.
 3. Annie scaffolds a Vite + React + shadcn + Hono project from the committed template. The template is pre-built, version-pinned, already runs. Not generated.
 4. Annie issues code-gen tasks one at a time into the running project. Each task: generate code → write to file → run `npm run build` → headless-browser DOM check → if errors, fix or rollback → commit. User sees a live preview URL updating as Annie works.
-5. Live preview via Vite dev server + Hono API server, fronted by a Caddy reverse proxy, served through a named Cloudflare tunnel at `<slug>.preview.coldanvil.com`.
+5. Live preview via Vite dev server + Hono API server, fronted by a Caddy reverse proxy, served through a named Cloudflare tunnel at `<slug>-preview.coldanvil.com`.
 6. When done, Annie publishes to `{project}.coldanvil.com` via Fly.io (stack + hosting combo locked 2026-04-18 per `Research/adorable_dyad_deep_research.md` §4).
 7. User gets the URL.
 
@@ -95,7 +95,7 @@ The template lives at `templates/vite-hono-mvp/` (replaces the removed `template
 | 1 | **Conversation** | EXISTING — adapt | `api/services/conversation.py` + supporting modules. Extend phases to include `build_planning`. Update Annie's system prompt for the conversation→build transition. | 2 days |
 | 2 | **Stack (scaffolder)** | RE-DO on new stack | `builder/scaffold.py` (module stays — template-agnostic). Target template moves from `templates/nextjs-mvp/` to `templates/vite-hono-mvp/` (Dyad fork + Hono + Litestream). | 0.25 days (module adjust) + 1.5 days (new template from Dyad scaffold) |
 | 3 | **Code-gen** | PARTIALLY RE-DO | `builder/codegen.py` core + retry loop survives. `forge/prompts/annie_codegen.md` rewritten for new stack's conventions. PoC prompts re-run against new stack to re-verify fleet capability. | 1.5 days (prompt + re-verify) |
-| 4 | **Live preview** | NEW | `builder/preview.py`. Starts `npm run dev` (Vite), exposes via a **named Cloudflare tunnel** at `<slug>.preview.coldanvil.com`. Caddy reverse proxy routes hostname → correct per-project dev port. Manages process lifecycle. Vite's HMR over the tunnel is naturally quicker than Next's Turbopack-based HMR. | 2 days |
+| 4 | **Live preview** | NEW | `builder/preview.py`. Starts `npm run dev` (Vite), exposes via a **named Cloudflare tunnel** at `<slug>-preview.coldanvil.com`. Caddy reverse proxy routes hostname → correct per-project dev port. Manages process lifecycle. Vite's HMR over the tunnel is naturally quicker than Next's Turbopack-based HMR. | 2 days |
 | 5 | **Refinement** | DEFERRED (Phase 3.5 visual-edit extension) | Thin wrapper around code-gen for targeted edits from user requests. Phase 3.5 adds click-to-select in preview (Dyad's component-tagger + proxy-injected selector — see `Research/adorable_dyad_deep_research.md` §3). | 3 days core + 5 days visual-edit (Phase 3.5) |
 | 6 | **Deployment** | NEW | `builder/deploy.py`. `fly deploy` against a per-project Fly.io app. Wildcard DNS `*.coldanvil.com` → Fly edge. Litestream config per app for continuous SQLite replication. | 2 days + 1 day infra setup |
 | 7 | **Portability** | DEFERRED | Zip project directory, serve as download. | 1 day |
@@ -162,9 +162,9 @@ Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup mo
 
 ### Phase 3: Preview + Orchestrator (4 days, partially parallel with Phase 0.5)
 
-- **3.1** Implement `builder/preview.py`. Per-project `npm run dev` (Vite) subprocess on an allocated port, plus the Hono API server on a sibling port, fronted by a Caddy reverse proxy that routes `<slug>.preview.coldanvil.com` → the right ports. Named Cloudflare tunnel from our deploy host to `*.preview.coldanvil.com`. Process lifecycle + orphan cleanup. *Can start as soon as the new template works (Phase 0.5).* (2 days)
+- **3.1** Implement `builder/preview.py`. Per-project `npm run dev` (Vite) subprocess on an allocated port, plus the Hono API server on a sibling port, fronted by a Caddy reverse proxy that routes `<slug>-preview.coldanvil.com` → the right ports. Named Cloudflare tunnel from our deploy host to `*-preview.coldanvil.com` (one-level wildcard on free Universal SSL; two-level would need Advanced Certificate Manager — deferred). Process lifecycle + orphan cleanup. *Can start as soon as the new template works (Phase 0.5).* (2 days)
 - **3.2** Implement `builder/orchestrator.py`. The build loop: read extraction state → plan tasks → execute code-gen calls one by one → verify each → update preview → report to user. *Depends on Phase 2 core.* (3 days)
-- **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>.preview.coldanvil.com` loads the current state.
+- **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>-preview.coldanvil.com` loads the current state.
 
 *3.1 runs in parallel with Phase 0.5 + Phase 2.5. 3.2 depends on Phase 2 core.*
 
