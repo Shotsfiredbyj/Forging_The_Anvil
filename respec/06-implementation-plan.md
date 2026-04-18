@@ -2,7 +2,7 @@
 
 *Written by Annie, April 2026. For the engineer who starts building tomorrow.*
 
-**Status as of 2026-04-17:** Phase 0 is COMPLETE. The PoC cleared the PROCEED threshold (5/5 primary, 3/5 swap). Detailed Phase 0 state lives in `Cold_Anvil/BUILDING.md`. A companion document, `respec/07-creative-memory.md`, was written after Phase 0 and adds a new module (`builder/creative.py`) and a first-class creative-brief input to every code-gen call. This plan has been updated to fold in those commitments and the Phase 0 lessons. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code.
+**Status as of 2026-04-18:** Phase 0, Phase 0.5, Phase 1 + 2 core, and **Phase 3.1 (preview)** are COMPLETE. The PoC cleared the PROCEED threshold on both stacks (Next.js and Vite); primary model rotated to Qwen3.6-35B-A3B-FP8 after the head-to-head on the new stack. Preview is live end-to-end on elostirion — `https://{slug}-preview.coldanvil.com/` serves real projects through a Cloudflare tunnel. Detailed state lives in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Phase 3.2 orchestrator.**
 
 ---
 
@@ -95,7 +95,7 @@ The template lives at `templates/vite-hono-mvp/` (replaces the removed `template
 | 1 | **Conversation** | EXISTING — adapt | `api/services/conversation.py` + supporting modules. Extend phases to include `build_planning`. Update Annie's system prompt for the conversation→build transition. | 2 days |
 | 2 | **Stack (scaffolder)** | RE-DO on new stack | `builder/scaffold.py` (module stays — template-agnostic). Target template moves from `templates/nextjs-mvp/` to `templates/vite-hono-mvp/` (Dyad fork + Hono + Litestream). | 0.25 days (module adjust) + 1.5 days (new template from Dyad scaffold) |
 | 3 | **Code-gen** | PARTIALLY RE-DO | `builder/codegen.py` core + retry loop survives. `forge/prompts/annie_codegen.md` rewritten for new stack's conventions. PoC prompts re-run against new stack to re-verify fleet capability. | 1.5 days (prompt + re-verify) |
-| 4 | **Live preview** | NEW | `builder/preview.py`. Starts `npm run dev` (Vite), exposes via a **named Cloudflare tunnel** at `<slug>-preview.coldanvil.com`. Caddy reverse proxy routes hostname → correct per-project dev port. Manages process lifecycle. Vite's HMR over the tunnel is naturally quicker than Next's Turbopack-based HMR. | 2 days |
+| 4 | **Live preview** | ✓ DONE 2026-04-18 | `builder/preview.py` + `builder/caddy.py` live on elostirion. `npm run dev` per project on OS-assigned ports; Caddy routes `{slug}-preview.coldanvil.com` → the right port; named Cloudflare tunnel fronts Caddy on the public internet. | 2 days |
 | 5 | **Refinement** | DEFERRED (Phase 3.5 visual-edit extension) | Thin wrapper around code-gen for targeted edits from user requests. Phase 3.5 adds click-to-select in preview (Dyad's component-tagger + proxy-injected selector — see `Research/adorable_dyad_deep_research.md` §3). | 3 days core + 5 days visual-edit (Phase 3.5) |
 | 6 | **Deployment** | NEW | `builder/deploy.py`. `fly deploy` against a per-project Fly.io app. Wildcard DNS `*.coldanvil.com` → Fly edge. Litestream config per app for continuous SQLite replication. | 2 days + 1 day infra setup |
 | 7 | **Portability** | DEFERRED | Zip project directory, serve as download. | 1 day |
@@ -162,11 +162,11 @@ Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup mo
 
 ### Phase 3: Preview + Orchestrator (4 days, partially parallel with Phase 0.5)
 
-- **3.1** Implement `builder/preview.py`. Per-project `npm run dev` (Vite) subprocess on an allocated port, plus the Hono API server on a sibling port, fronted by a Caddy reverse proxy that routes `<slug>-preview.coldanvil.com` → the right ports. Named Cloudflare tunnel from our deploy host to `*-preview.coldanvil.com` (one-level wildcard on free Universal SSL; two-level would need Advanced Certificate Manager — deferred). Process lifecycle + orphan cleanup. *Can start as soon as the new template works (Phase 0.5).* (2 days)
+- **3.1** ✓ **COMPLETE 2026-04-18.** `builder/preview.py` + `builder/caddy.py` built, tested, deployed on elostirion. Per-project `npm run dev` subprocess on OS-assigned Vite + Hono ports, running as a POSIX process group. Caddy reverse proxy listens on :8000, routes by Host header to the right project. Named Cloudflare tunnel `coldanvil-preview` (tunnel ID `407b797d-2b42-4533-9e6c-6566c385ca41`) fronts Caddy. DNS `*.coldanvil.com` wildcard on free Universal SSL (hyphen-format slugs — deferred upgrade to `{slug}.preview.coldanvil.com` when revenue justifies Advanced Certificate Manager at $10/mo, per Arnor memory `cold_anvil_preview_url_deferred_acm_upgrade_2026-04-18`). Public URL `https://{slug}-preview.coldanvil.com/` verified end-to-end. Full deployment state in `Cold_Anvil/BUILDING.md`. (2 days estimated; delivered in 1 session.)
 - **3.2** Implement `builder/orchestrator.py`. The build loop: read extraction state → plan tasks → execute code-gen calls one by one → verify each → update preview → report to user. *Depends on Phase 2 core.* (3 days)
 - **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>-preview.coldanvil.com` loads the current state.
 
-*3.1 runs in parallel with Phase 0.5 + Phase 2.5. 3.2 depends on Phase 2 core.*
+*3.1 ran in parallel with Phase 0.5 + Phase 2.5 as planned. 3.2 depends on Phase 2 core (done).*
 
 ### Phase 3.5: Visual edit (5 days) — NEW per `Research/adorable_dyad_deep_research.md` §3; POST-MVP
 
