@@ -2,7 +2,7 @@
 
 *Written by Annie, April 2026. For the engineer who starts building tomorrow.*
 
-**Status as of 2026-04-18:** Phase 0, Phase 0.5, Phase 1 + 2 core, Phase 3.1 (preview), **and Phase 3.2 (orchestrator)** are COMPLETE. First full end-to-end build proven on elostirion against the real Gateway — 3-step plan, 217s, public URL served a real 3-page React SPA with a working API. Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Annie-driven planning (option B) or Phase 4 conversation bridge.**
+**Status as of 2026-04-18:** Phase 0, 0.5, 1, 2 core, 3.1 (preview), 3.2 (orchestrator), **and 3.4 (Option B — Annie-driven planning)** are COMPLETE. First full end-to-end build proven on elostirion against the real Gateway — 3-step plan, 217s, public URL served a real 3-page React SPA with a working API. Planner runs also proven: Annie produces a project-shaped plan in ~5s on warm Qwen3.6, with clean fallback to the hardcoded skeleton when validation rejects the output. Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Phase 4 conversation bridge (WebSocket wiring) — the orchestrator is already shaped to fit.**
 
 ---
 
@@ -168,7 +168,7 @@ Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup mo
 
 *3.1 ran in parallel with Phase 0.5 + Phase 2.5 as planned. 3.2 depends on Phase 2 core (done).*
 
-### Phase 3.4: Option B — Annie-driven planning (2 days) — next on the critical path
+### Phase 3.4: Option B — Annie-driven planning ✓ COMPLETE 2026-04-18
 
 Replace the hardcoded `plan_default()` in `builder/orchestrator.py` with a planner that reads extraction state and produces a task sequence shaped to the specific project. Per Arnor memory `cold_anvil_orchestrator_planning_roadmap_2026-04-18` Jack's top post-3.2 priority.
 
@@ -198,7 +198,7 @@ Replace the hardcoded `plan_default()` in `builder/orchestrator.py` with a plann
 - Unit: mock Gateway response with various JSON shapes (valid, malformed, over-long, weird).
 - Integration (opt-in): real Gateway call with a handful of canned extraction states, assert the produced plan's shape + task_types come from the allowed set.
 
-Ships before Phase 4 conversation bridge so the first user-visible build flow already uses option B.
+Ships before Phase 4 conversation bridge so the first user-visible build flow already uses option B. **Shipped** as `builder/planner.py` + `builder/orchestrator.run_with_planner`; 32 planner unit tests + 2 orchestrator composition tests all green. Two real-Gateway runs on elostirion proved both the happy path (4.8s to produce a project-shaped plan) and the clean fallback (rejected plan → `plan_default` → build still succeeds). See `Cold_Anvil/BUILDING.md` for outcomes + parked follow-ups (path-allowlist tuning, scaffold-vs-running-preview collision, post-build readiness grace).
 
 ### Phase 3.5: Visual edit (5 days) — NEW per `Research/adorable_dyad_deep_research.md` §3; POST-MVP
 
