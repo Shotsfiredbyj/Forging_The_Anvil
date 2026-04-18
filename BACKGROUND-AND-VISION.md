@@ -299,8 +299,8 @@ spine.
 **Sub-brands.** Verticals built on Cold Anvil's platform, each with its own
 product surface, positioning, and domain knowledge, but sharing the
 pipeline, eval, and pack infrastructure underneath. Two are in motion
-below: **Fourth Age** for content creators, and **Nellie** (working
-name) for clinical decision support in functional medicine. Over time
+below: **Fourth Age** for content creators, and **Celyn** for
+clinical decision support in functional medicine. Over time
 the studio can stand up additional verticals wherever a market has a
 distinctive domain, a quality bar Cold Anvil's eval can encode, and an
 audience that wouldn't respond to the parent brand directly.
@@ -463,13 +463,13 @@ The Fourth Age is where Cold Anvil proves it's not just internal tooling
 that happened to get a SaaS wrapper. It's where the platform meets a real
 customer with real quality requirements and real money on the line.
 
-## Cold Anvil as the Engine Behind Nellie
+## Cold Anvil as the Engine Behind Celyn
 
-Nellie (working name; .com and .ai domains TBD) is the studio's second
-sub-brand — clinical decision support software for functional medicine
-clinics. It originated as a demo built for an interview at Neko Health
-that didn't result in an offer, and has since evolved into a B2B product
-hypothesis in its own right.
+Celyn (Welsh for *holly* / *evergreen*) is the studio's second sub-brand
+— clinical decision support software for functional medicine clinics. It
+originated as a demo built for an interview at Neko Health that didn't
+result in an offer, and has since evolved into a B2B product hypothesis
+in its own right.
 
 ### The wedge
 
@@ -479,10 +479,10 @@ synthesis — reviewing labs, intake forms, food and sleep logs, prior
 history. The 1:1 time with the patient is what makes the experience
 valuable; the data-wrangling around it is the bottleneck.
 
-Nellie compresses the data-synthesis layer — ingesting lab PDFs, intake
+Celyn compresses the data-synthesis layer — ingesting lab PDFs, intake
 forms, app exports, and prior records, and producing a structured draft
 clinical narrative the practitioner reviews and finalises. The clinician
-keeps the dedicated 1:1 time; the gruntwork moves to Nellie. With a
+keeps the dedicated 1:1 time; the gruntwork moves to Celyn. With a
 qualified practitioner in the loop interpreting the output, the product
 sits in clinical decision support territory under both MHRA and FDA — a
 materially lighter regulatory pathway than direct-to-patient
@@ -494,7 +494,7 @@ Strict quality requirements, structured outputs, opinionated rubrics, and
 a human-in-the-loop reviewer — this is exactly the shape Cold Anvil's
 pipeline is built for. The mapping is direct:
 
-| Nellie need | Cold Anvil component |
+| Celyn need | Cold Anvil component |
 |-------------|---------------------|
 | Generate draft clinical narrative from labs + intake + history | **Pipeline** — prompt template with patient context variables, routed to a clinically-tuned generator |
 | Score narrative against clinical accuracy and framework adherence | **Eval** — rubric-based model-as-judge with weighted dimensions (factual accuracy, framework consistency, hedge-on-uncertainty, source citation) |
@@ -514,22 +514,25 @@ The product hypothesis is unvalidated. Before more building:
 
 - 10–15 customer discovery conversations with functional medicine
   clinicians, anchored on 2heal.se as the warm-intro starting point.
-- Map the actual workflow — where Nellie sits in the consultation cycle,
+- Map the actual workflow — where Celyn sits in the consultation cycle,
   what surfaces it appears on, what the clinician's day-of-appointment
-  screen looks like with Nellie in it.
+  screen looks like with Celyn in it.
 - Surface real willingness-to-pay and the budget shape (per-seat?
   per-encounter? hybrid?).
 - Find the *single biggest* time-sink to wedge into for v1, rather than
   trying to be the full clinical assistant from day one.
 
-Naming is also open. "Nellie" originated as a wink at Neko Health and
-loses its load-bearing meaning as a Cold Anvil Studios sub-brand. The
-working name persists until a new one wins on its own merits and has the
-.com and .ai domains available.
+Naming is resolved. **Celyn** — Welsh for *holly* / *evergreen*. The
+original working name "Nellie" was a wink at Neko Health that lost its
+load-bearing meaning as a Cold Anvil Studios sub-brand. Celyn's Welsh
+origin places it unambiguously pre-Tolkien, and the semantic fit (herbal,
+living systems, growth) maps directly onto functional medicine's lineage.
+Domain portfolio owned: `celyn.health` as primary, `celynhealth.com` as
+secondary, `celyn.ai` parked for later.
 
 ### Why this matters for Cold Anvil
 
-Nellie pressure-tests the studio model in a domain that's the opposite
+Celyn pressure-tests the studio model in a domain that's the opposite
 of Fourth Age in nearly every dimension — B2B not B2C, clinical not
 creative, slow institutional sales not consumer signup, regulated not
 open. If Cold Anvil's pipeline can power both, it can power most things.
