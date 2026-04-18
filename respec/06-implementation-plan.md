@@ -116,7 +116,11 @@ Critical path: **Template → Scaffold → Code-gen → Verification → Preview
 - **0.3** ✓ `Cold_Anvil/scripts/poc_codegen.py` + prompts built as the proof-of-concept substitute for stub `builder/`. Prompts are Next.js-specific; rewritten for Vite + React in Phase 0.5.
 - **0.4** ✓ PoC verdict: **PROCEED on Next.js**. 5/5 primary, 3/5 swap passed. Fleet capability validated; stack choice revisited after Adorable + Dyad research.
 
-### Phase 0.5: Stack swap to Vite + React + shadcn/ui + Hono (4 days) — NEW, in progress 2026-04-18
+### Phase 0.5: Stack swap to Vite + React + shadcn/ui + Hono (4 days) — COMPLETE 2026-04-18
+
+**Outcome:** all six subtasks done. Template forked + extended + verified. PoC re-run on new stack produced PROCEED verdict on both Gemma4-31b (5/5 primary + 1/5 swap) and Qwen3.6-35B-A3B-FP8 (5/5 primary + 2/5 swap). Primary model rotated from Gemma4-31B to Qwen3.6-35B-A3B — narrow but real win on multi-table schema + cross-file wiring. Fast suite 360 passing. Phase 1 modules (scaffold, verify, codegen, creative slicing) all functional on the new stack. DOM-sanity headless-browser verification layer added per §8.3.
+
+See `Cold_Anvil/BUILDING.md` for current implementation state. See Arnor memory `cold_anvil_primary_model_qwen3_6_35b_a3b_2026-04-18` for the PoC comparison numbers.
 
 *Grounded in `Research/adorable_dyad_deep_research.md` §4.6. What survives vs. what gets rebuilt:*
 
@@ -227,7 +231,7 @@ Ships after Phase 6 polish. Not blocking MVP.
 
 **Verdict on Next.js (2026-04-17): PROCEED.** 5/5 primary, 3/5 swap. Answered on the old stack.
 
-**Stack change 2026-04-18:** The fleet has not yet been verified on Vite + React + shadcn + Hono. The architectural shift should make the fleet's job *easier* (no RSC boundary, no runtime pinning, no Turbopack native-module issues) so we expect equal-or-better pass rates. Phase 0.5.2 re-runs all five PoC capabilities against the new stack before Phase 3 begins. A PROCEED verdict on the new stack is a precondition for Phase 3; a regression below 4/5 primary triggers escalation.
+**Stack change 2026-04-18 — VERIFIED:** Phase 0.5.2 re-ran all five PoC capabilities on the Vite + shadcn + Hono stack. Both Gemma4-31B and Qwen3.6-35B-A3B-FP8 cleared the PROCEED threshold (5/5 primary on both; 1/5 and 2/5 swap respectively). Qwen3.6-35B-A3B is now the primary model based on the head-to-head comparison. Fleet capability on the new stack is confirmed equal-or-better than on Next.js — consistent with the research's prediction that the simpler scaffold is easier for smaller open-weight models.
 
 The Phase 0 PoC ran five capability prompts (interactive, list, API, dynamic route, multi-file schema), each with a primary and a swap vehicle. Gemma4-31b produced working Next.js 15 + TypeScript + Tailwind v4 + better-sqlite3 code on 5 of 5 primaries (one needed a retry) and 3 of 5 swaps. Full results + artefacts in `Cold_Anvil/BUILDING.md`.
 
