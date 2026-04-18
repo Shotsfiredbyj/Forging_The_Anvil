@@ -2,7 +2,7 @@
 
 *Written by Annie, April 2026. For the engineer who starts building tomorrow.*
 
-**Status as of 2026-04-18:** Phase 0, 0.5, 1, 2 core, 3.1 (preview), 3.2 (orchestrator), **and 3.4 (Option B — Annie-driven planning)** are COMPLETE. First full end-to-end build proven on elostirion against the real Gateway — 3-step plan, 217s, public URL served a real 3-page React SPA with a working API. Planner runs also proven: Annie produces a project-shaped plan in ~5s on warm Qwen3.6, with clean fallback to the hardcoded skeleton when validation rejects the output. Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Phase 4 conversation bridge (WebSocket wiring) — the orchestrator is already shaped to fit.**
+**Status as of 2026-04-18:** Phase 0, 0.5, 1, 2 core, 3.1 (preview), 3.2 (orchestrator), 3.4 (Option B — Annie-driven planning), **and Phase 4 (conversation bridge, service layer)** are COMPLETE at the code/test level. End-to-end build proven on elostirion. Planner proven: Qwen3.6 produces project-shaped plans in ~5s with clean layman-facing labels and descriptions on first try. Bridge (`api/services/build.py`) is the thin adapter between the conversation WebSocket and the builder package: `propose_plan` scaffolds + plans + emits a `plan_ready` event with user-facing step labels; `confirm_plan` runs the orchestrator and streams user-facing progress events; `reject_plan` returns to the conversation. Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call; respec/03 §9 codifies the user-facing-language rule. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: front-end + deploy the API somewhere, so a real user in a browser can drive the flow end-to-end.**
 
 ---
 
@@ -212,11 +212,15 @@ Click-an-element-in-the-preview-and-have-the-model-edit-the-right-file. Dyad's o
 
 Ships after Phase 6 polish. Not blocking MVP.
 
-### Phase 4: Conversation bridge (3 days)
+### Phase 4: Conversation bridge — service layer ✓ COMPLETE 2026-04-18
 
-- **4.1** Extend conversation phases: add `build_planning` phase. Annie proposes what she'll build, user confirms. (1 day)
-- **4.2** Update `confirm_generation` handler: scaffold → start preview → kick off orchestrator as background task → stream progress events via WebSocket. (1.5 days)
-- **4.3** New WebSocket events: `build_started` (with preview URL), `build_step`, `build_error`, `build_complete`. (0.5 day)
+Code + tests complete; remaining work is a front-end + deploy the API process somewhere.
+
+- **4.1** ✓ Split `confirm_generation` into a two-stage flow. `confirm_generation` runs `propose_plan` (scaffold + plan, emits `plan_ready` with per-step user-facing labels). `confirm_plan` runs `execute_plan` (orchestrator run, streams progress, persists final state). `reject_plan` returns to the conversation loop.
+- **4.2** ✓ `api/services/build.py` is the bridge. `propose_plan` and `execute_plan` own the build lifecycle transitions; all DB updates happen here. Build state persisted via new columns on `projects` (`build_state`, `project_dir`, `preview_url`, `build_error`, `proposed_plan`); migration `b2e7c9d1f4a0`.
+- **4.3** ✓ WebSocket events all emit in user-facing language per respec/03 §9: `scaffold_started`, `planning`, `plan_ready`, `build_started`, `build_step_started`, `build_step_finished`, `build_preview_refreshed`, `build_complete`, `build_failed`, `plan_cleared`. Orchestrator events (technical labels) are translated by the bridge before they reach the browser; jargon never leaks. Validation in the planner rejects jargon in any user-facing field so the model produces clean text — proven on Qwen3.6 with zero fallback on a restaurant-menu extraction state.
+
+Follow-ups (not blocking Phase 4): front-end that renders the event stream, deploy FastAPI process, apply migration to the production DB.
 
 ### Phase 5: Deployment (3 days)
 
