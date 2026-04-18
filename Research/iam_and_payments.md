@@ -419,7 +419,7 @@ At 10k users, Paddle looks ~$3k/mo cheaper on pure processing fees — but you'v
 - **Usage metering** → when cascade-tier pricing proves insufficient; start fixed-tier.
 - **Orb** → when Stripe Billing Meter hits dimensional-pricing limits.
 - **SAML/SSO for enterprise clinics** → first clinic asks; layer WorkOS or Logto Enterprise as add-on, not replacement.
-- **Dedicated vanity domains per sub-brand** beyond Celyn → third sub-brand.
+- **Dedicated vanity domains per sister product** beyond Fourth Age + Celyn → fourth sister product.
 - **Hardware-token MFA / FIDO2 beyond passkeys** → enterprise customer requirement.
 - **Fine-grained per-token AI metering** → gross margin squeeze on a specific tier.
 - **Step-up MFA with TOTP** → passkeys cover this for now.

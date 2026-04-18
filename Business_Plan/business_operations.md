@@ -8,8 +8,8 @@
 
 - Jack is a **dual citizen** — Swedish + UK — **resident in Sweden.**
 - Solo founder at day one. Preference: operational ease.
-- Cold Anvil Studios is the parent brand. First surface is Cold Anvil consumer (B2C); second is Celyn (B2B clinical decision support for functional medicine clinics); accelerator cohort is a future strand.
-- Celyn won't ship from day one — but the data model, payments rails, and compliance posture must accommodate it without retrofit.
+- Cold Anvil Studios (the AB) is the holding company. Three sister products live under it, each its own business with its own brand and audience: **Cold Anvil** (consumer AI product engineer, ships first and is the commercial spine), **Fourth Age** (AI creative partner for content creators, designed but not built), and **Celyn** (B2B clinical decision support for functional medicine clinics, prototype, far out). An accelerator cohort is a future strand.
+- Cold Anvil is designed for Cold Anvil. Sister products get their own architectural calls when they're real — Cold Anvil's stack isn't shaped by anticipation. What the rigorous infra earns regardless (multi-tenant schema for the accelerator cohort, audit logs, signed webhooks) is good hygiene in its own right; it happens to make future reuse easier if sister products choose to lift it.
 
 ---
 

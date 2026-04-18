@@ -285,30 +285,34 @@ autonomy and goal-backward verification — see [AGENTIC-VISION.md](AGENTIC-VISI
 
 The pipeline is the engine. It's not the whole company.
 
-Cold Anvil's long-term shape is a studio — a parent brand that builds
-products, some for external customers and some for its own verticals, with
-craft accumulated along the way spilling out as standalone tools and an
-accelerator cohort running alongside. Four strands flow from the same
-engine.
+Cold Anvil's long-term shape is a studio — **Cold Anvil Studios** as the
+holding company, with several sister products underneath. Each sister
+product is its own business with its own brand, audience, and architectural
+decisions; what they share is engineering learnings from a common engine
+and, where it makes sense, deliberate reuse of infrastructure. Craft
+accumulated along the way spills out as standalone tools, and an
+accelerator cohort runs alongside. Four strands flow from the same engine.
 
 **The customer product.** The pipeline-as-a-service described above — small
 enterprises, founders, and technical teams using Cold Anvil to turn ideas
 into shippable output. This is what ships first and remains the commercial
 spine.
 
-**Sub-brands.** Verticals built on Cold Anvil's platform, each with its own
-product surface, positioning, and domain knowledge, but sharing the
-pipeline, eval, and pack infrastructure underneath. Two are in motion
-below: **Fourth Age** for content creators, and **Celyn** for
-clinical decision support in functional medicine. Over time
-the studio can stand up additional verticals wherever a market has a
-distinctive domain, a quality bar Cold Anvil's eval can encode, and an
-audience that wouldn't respond to the parent brand directly.
+**Sister products.** Standalone businesses under Cold Anvil Studios, each
+with its own brand, audience, domain knowledge, and architectural
+decisions. What they share is engineering learnings from Cold Anvil's
+engine and — where it's worth doing — deliberate reuse of pipeline, eval,
+and pack infrastructure. Two are in motion below: **Fourth Age** for
+content creators, and **Celyn** for clinical decision support in
+functional medicine. Over time the studio can stand up additional sister
+products wherever a market has a distinctive domain, a quality bar Cold
+Anvil's eval can encode, and an audience the customer product wouldn't
+reach directly.
 
 **Side tools.** Standalone artefacts — free open source or cheap paid
 releases, five dollars framed as a donation rather than a license — that
 solve a specific problem for other builders and carry the Cold Anvil brand
-into developer communities the parent brand doesn't reach directly.
+into developer communities the customer product doesn't reach directly.
 
 **The accelerator.** A limited-cohort program for founders building AI
 products — and Cold Anvil's answer to the tagline *"AI Products, for
@@ -334,24 +338,31 @@ from Cold Anvil's own work: they become small tools, carry the brand, and
 prove the engineering depth behind the product.
 
 **Why this shape works.** The pipeline is reusable by definition — the
-Fourth Age mapping below demonstrates that any vertical can ride on top
+Fourth Age mapping below demonstrates that any product can ride on top
 of it. Craft accumulates: rubrics, gates, patterns, and solutions to
 problems like temporal grounding are portable artefacts, not one-off
-code. And a studio lets Cold Anvil serve audiences the parent brand can't
-reach directly — content creators through sub-brands, developers through
-side tools — without diluting the positioning of the customer product.
+code. And a studio lets Cold Anvil Studios serve audiences no single
+product could reach alone — content creators through sister products,
+developers through side tools — without diluting the positioning of the
+customer product. The "two other businesses built on this engine" story
+is itself an asset for users and investors.
 
 **What this doesn't change.** Nothing about what ships first. The current
 spec (`respec/03-spec.md`) is the customer product and remains the
-critical path. Sub-brands, side tools, and the accelerator sequence after the customer
-product is in motion — bandwidth, not brand permission, sets the order. This section names the shape of the
-company so decisions made now — brand language, domain boundaries, what
-counts as "in scope" — are consistent with where it's heading.
+critical path. Sister products, side tools, and the accelerator sequence
+after the customer product is in motion — bandwidth, not brand permission,
+sets the order. Each sister product gets its own architectural calls when
+it's real; none of them shape Cold Anvil's decisions today by anticipation.
+This section names the shape of the company so decisions made now — brand
+language, domain boundaries, what counts as "in scope" — are consistent
+with where it's heading.
 
 ## Cold Anvil as the Engine Behind The Fourth Age
 
-Fourth Age is the studio's first sub-brand — a worked example of the
-pattern above.
+Fourth Age is the studio's first sister product — a worked example of
+the pattern above. It's its own business with its own brand and audience;
+what it shares with Cold Anvil is the underlying engine, by deliberate
+choice rather than architectural inheritance.
 
 
 The Fourth Age (fourthage.ai) is an AI creative partner for content creators —
@@ -465,11 +476,14 @@ customer with real quality requirements and real money on the line.
 
 ## Cold Anvil as the Engine Behind Celyn
 
-Celyn (Welsh for *holly* / *evergreen*) is the studio's second sub-brand
-— clinical decision support software for functional medicine clinics. It
-originated as a demo built for an interview at Neko Health that didn't
-result in an offer, and has since evolved into a B2B product hypothesis
-in its own right.
+Celyn (Welsh for *holly* / *evergreen*) is the studio's second sister
+product — clinical decision support software for functional medicine
+clinics. It's its own business with its own brand and audience; any
+architectural reuse of Cold Anvil's engine will be a deliberate lift when
+the time comes, not a constraint baked in from day one. It originated as
+a demo built for an interview at Neko Health that didn't result in an
+offer, and has since evolved into a B2B product hypothesis in its own
+right.
 
 ### The wedge
 
@@ -524,7 +538,8 @@ The product hypothesis is unvalidated. Before more building:
 
 Naming is resolved. **Celyn** — Welsh for *holly* / *evergreen*. The
 original working name "Nellie" was a wink at Neko Health that lost its
-load-bearing meaning as a Cold Anvil Studios sub-brand. Celyn's Welsh
+load-bearing meaning once the product became its own company under Cold
+Anvil Studios. Celyn's Welsh
 origin places it unambiguously pre-Tolkien, and the semantic fit (herbal,
 living systems, growth) maps directly onto functional medicine's lineage.
 Domain portfolio owned: `celyn.health` as primary, `celynhealth.com` as

@@ -249,7 +249,7 @@ A **fifth artefact** fills the gap.
 
 ### Boundary — user projects vs. Cold Anvil's own brand
 
-The fifth artefact (`docs/design.md`) is for the **user's project**. It is distinct from `Cold_Anvil/BRAND.md`, which governs **Cold Anvil's own surfaces** (coldanvil.com marketing, the Annie chat UI, studio identity, sub-brand shells). BRAND.md's Bullfinch Forge palette + Newsreader/Inter typography + outlined-card system applies to Cold Anvil as a business. User projects never inherit it by default — they pick from a separate preset library. If a user *wants* to mirror the Cold Anvil house look that's a user choice they make by picking the relevant preset, not the default. Decision confirmed 2026-04-18; design presets must not blur this boundary.
+The fifth artefact (`docs/design.md`) is for the **user's project**. It is distinct from `Cold_Anvil/BRAND.md`, which governs **Cold Anvil's own surfaces** (coldanvil.com marketing, the Annie chat UI, studio identity). BRAND.md's Bullfinch Forge palette + Newsreader/Inter typography + outlined-card system applies to Cold Anvil as a business; sister products (Fourth Age, Celyn) each have their own brand system. User projects never inherit Cold Anvil's look by default — they pick from a separate preset library. If a user *wants* to mirror the Cold Anvil house look that's a user choice they make by picking the relevant preset, not the default. Decision confirmed 2026-04-18; design presets must not blur this boundary.
 
 ### Artefact shape
 
