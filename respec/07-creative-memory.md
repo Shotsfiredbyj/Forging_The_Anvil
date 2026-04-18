@@ -239,4 +239,40 @@ Three realistic options. Only option A is built at MVP.
 
 ---
 
+## 13. Design system — the fifth artefact (added 2026-04-18)
+
+*Added after Phase 3.2 shipped and Claude Design (Anthropic Labs, released 2026-04-17) surfaced a cleaner pattern for visual identity capture than the status quo. See Arnor memory entries for the decision chain.*
+
+The four original artefacts (vision, brand voice, content strategy, site architecture) cover what the product *says* and how it's *structured*. They leave visual identity — palette, typography, density — to shadcn/ui defaults. That means every Cold Anvil project ships looking identical: the same slate palette, the same sans-serif, the same spacing. Shippable, but the user feels like they got a template rather than something theirs.
+
+A **fifth artefact** fills the gap.
+
+### Artefact shape
+
+| Artefact | File | What it contains | When it's first produced |
+|---|---|---|---|
+| **Design** | `docs/design.md` | Palette tokens (primary / accent / surface / border / text on each surface), type pair (heading + body), base size + scale ratio, density (spacing scale baseline + component density — compact / standard / spacious), design-specific voice notes (button-weight conventions, icon style, photography vs. illustration leaning) | End of discovery, alongside brand voice — before the first build |
+
+### MVP production: curated presets
+
+Rather than Annie drafting bespoke design systems from scratch (too high-variance for MVP model capability), Cold Anvil ships with **~6 curated preset design systems**. The user picks one during discovery; the scaffold copies the preset to `docs/design.md`; from that point on it behaves like any other creative artefact — sliced into every codegen brief, editable in place, version-controlled.
+
+Preset count + aesthetic direction is a taste call (named presets + vibes TBD). Stored at `Cold_Anvil/templates/design-presets/{slug}.md`, each a full `design.md` the user's project can inherit.
+
+### Stage 2: Annie-generated contextual knobs
+
+Post-Phase-4, once the conversation bridge is wired, Annie can generate **2–3 project-specific design knobs** (not a universal slider panel) that adjust `docs/design.md` in place. For one project the knobs might be "warm vs. cool" and "minimal vs. decorative"; for another, "rigorous vs. playful" and "dense vs. airy." The controls themselves are personalised — same pattern Claude Design surfaced.
+
+### Slicing rules
+
+Design brief is included in every visual-output codegen brief (landing, feature, list, nav-layout, empty-state, interactive component). It's omitted from API-route and schema tasks (design has no relevance there). Slicing grain is coarse for MVP — the whole `docs/design.md` gets inlined — until we learn which sections matter most per task_type.
+
+### Scope boundaries for the first ship
+
+- **In:** palette + type + density + voice-notes text, applied as a single brief block.
+- **Not in (MVP):** generated component variants, icon library selection, motion language, asset-generation (logos, illustrations).
+- **Not in (ever, probably):** user-uploaded brand assets / design token imports from Figma. If users want bespoke assets they bring files to their own Fly deploy.
+
+---
+
 *End of addendum. The core `03-spec.md` remains authoritative for who Cold Anvil is for and what Annie delivers. This document specifies how creative decisions persist, are reviewed, are used, and are owned — as both the memory substrate for every subsequent build and the user's living documentation of their work.*

@@ -101,7 +101,7 @@ The template lives at `templates/vite-hono-mvp/` (replaces the removed `template
 | 7 | **Portability** | DEFERRED | Zip project directory, serve as download. | 1 day |
 | 8 | **Memory** | EXISTING — sufficient for first slice | Project model already stores `extraction_state` and `conversation_history` as JSONB. Cross-session memory deferred. | 0 days (first slice) / 3 days (full) |
 | 9 | **Orchestrator** | ✓ DONE 2026-04-18 | `builder/orchestrator.py`. Plan-driven build loop (Phase 3.2). Ships with hardcoded 3-step skeleton; Annie-driven planning is the next enhancement. | 4 days |
-| 10 | **Creative artefacts** | NEW — per `respec/07-creative-memory.md` | `builder/creative.py`. Drafts `docs/vision.md`, `docs/brand-voice.md`, `docs/content-strategy.md`, `docs/site-architecture.md` from conversation state. Runs eval-gate (rubrics already exist in the forge layer). Drives the Annie↔user review loop. Persists to `docs/`. Serves slices to the code-gen prompt assembler as the creative-brief block. | 4 days |
+| 10 | **Creative artefacts** | NEW — per `respec/07-creative-memory.md` | `builder/creative.py`. Drafts `docs/vision.md`, `docs/brand-voice.md`, `docs/content-strategy.md`, `docs/site-architecture.md`, **and `docs/design.md`** from conversation state. Slicing layer built + tested (Phase 2 core). Drafting + eval-gate + Annie↔user review loop deferred until Phase 4 gives real conversation signal. Design artefact ships as a small curated preset library (~6 options user picks from) per `respec/07-creative-memory.md` design-system addendum. | 4 days core + 1 day design presets |
 
 ---
 
@@ -164,9 +164,41 @@ Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup mo
 
 - **3.1** ✓ **COMPLETE 2026-04-18.** `builder/preview.py` + `builder/caddy.py` built, tested, deployed on elostirion. Per-project `npm run dev` subprocess on OS-assigned Vite + Hono ports, running as a POSIX process group. Caddy reverse proxy listens on :8000, routes by Host header to the right project. Named Cloudflare tunnel `coldanvil-preview` (tunnel ID `407b797d-2b42-4533-9e6c-6566c385ca41`) fronts Caddy. DNS `*.coldanvil.com` wildcard on free Universal SSL (hyphen-format slugs — deferred upgrade to `{slug}.preview.coldanvil.com` when revenue justifies Advanced Certificate Manager at $10/mo, per Arnor memory `cold_anvil_preview_url_deferred_acm_upgrade_2026-04-18`). Public URL `https://{slug}-preview.coldanvil.com/` verified end-to-end. Full deployment state in `Cold_Anvil/BUILDING.md`. (2 days estimated; delivered in 1 session.)
 - **3.2** ✓ **COMPLETE 2026-04-18.** `builder/orchestrator.py` + 15 unit tests. Plan-driven build loop: `codegen_with_retries` → preview refresh per success → tear-down on failure (Jack's rule: no broken output to users). Default plan is a hardcoded 3-step skeleton (option A per `cold_anvil_orchestrator_planning_roadmap_2026-04-18`). Option B (Annie-driven planning from extraction state) is the top post-3.2 priority. First end-to-end run on elostirion produced a real 3-page React SPA with working API in 217s. (3 days estimated; core + tests + e2e proof delivered in 1 session.)
-- **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>-preview.coldanvil.com` loads the current state.
+- **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>-preview.coldanvil.com` loads the current state. *Proven 2026-04-18 via the option-A default plan; will be retested against option B outputs once 3.4 lands.*
 
 *3.1 ran in parallel with Phase 0.5 + Phase 2.5 as planned. 3.2 depends on Phase 2 core (done).*
+
+### Phase 3.4: Option B — Annie-driven planning (2 days) — next on the critical path
+
+Replace the hardcoded `plan_default()` in `builder/orchestrator.py` with a planner that reads extraction state and produces a task sequence shaped to the specific project. Per Arnor memory `cold_anvil_orchestrator_planning_roadmap_2026-04-18` Jack's top post-3.2 priority.
+
+**What Annie gets to vary:**
+- Number of pages and their page_hints (e.g. restaurant site → menu + about + contact; B2B tool → landing + pricing + signup).
+- Number and shape of API endpoints (schema-shape decisions too).
+- Task ordering where it matters for cross-file wiring.
+
+**What stays fixed:**
+- The stack invariants (Vite + shadcn + Hono + better-sqlite3 server-only).
+- The CodegenTask contract (`target_files`, `existing_files`, `forbidden_extras`).
+- The 5-step-max ceiling for MVP — keeps cold-start amortisation reasonable (~3.5 min for 3 steps; a 10-step plan would double that).
+
+**Implementation shape:**
+- `builder/planner.py` — async function `plan_from_extraction(extraction_state) -> list[TaskSpec]`.
+- Uses the same Gateway client as codegen. Prompt is structured to produce JSON, validated by Pydantic, with a fallback to `plan_default` on parse/validation failure (so a planner hiccup never blocks the build).
+- Temperature lower than codegen (0.1) — we want deterministic plan structure, not creativity.
+- Primary model: Qwen3.6-35B-A3B (same as codegen) unless evaluation says otherwise.
+
+**Failure modes to handle:**
+- JSON parse failure → fallback to `plan_default`, log the failure for later prompt tuning.
+- Plan with >5 steps → clip to 5, log.
+- Plan that requests files outside the target conventions → refuse, fallback.
+- Plan with duplicate page_hints → dedupe, log.
+
+**Tests:**
+- Unit: mock Gateway response with various JSON shapes (valid, malformed, over-long, weird).
+- Integration (opt-in): real Gateway call with a handful of canned extraction states, assert the produced plan's shape + task_types come from the allowed set.
+
+Ships before Phase 4 conversation bridge so the first user-visible build flow already uses option B.
 
 ### Phase 3.5: Visual edit (5 days) — NEW per `Research/adorable_dyad_deep_research.md` §3; POST-MVP
 
@@ -188,7 +220,8 @@ Ships after Phase 6 polish. Not blocking MVP.
 
 ### Phase 5: Deployment (3 days)
 
-- **5.1** Implement `builder/deploy.py`. `fly launch` / `fly deploy` against a per-project Fly.io app. Persistent volume mount for the SQLite file; Litestream sidecar config for continuous replication to object storage. Wildcard DNS `*.coldanvil.com` → Fly edge (one-time infra setup). (2 days)
+- **5.1** Implement `builder/deploy.py`. `fly launch` / `fly deploy` against a per-project Fly.io app. Persistent volume mount for the SQLite file; Litestream sidecar config for continuous replication to object storage. Wildcard DNS setup (one-time infra). (2 days)
+  - **DNS conflict to resolve before 5.1 lands:** `*.coldanvil.com` currently points at the preview tunnel on elostirion. For production deploys we need a different apex. Options: (a) move preview to `*-preview.coldanvil.com` specific records (but DNS wildcards don't support partial labels — see the cloudflared gotcha in `Cold_Anvil/BUILDING.md`); (b) use `*.apps.coldanvil.com` or `*.app.coldanvil.com` for production (two-level wildcard needs Advanced Certificate Manager at $10/mo); (c) route via cloudflared's ingress map on the same wildcard, splitting preview vs. prod by hostname pattern (same host, different upstreams). Resolve when Phase 5 starts.
 - **5.2** Deploy WebSocket event. User says "publish" → deploy → return URL. (0.5 day)
 - **5.3** Deployment smoke test: scaffold → codegen → deploy → request the public URL → confirm the rendered page loads and the SQLite file persists across a machine restart. (0.5 day)
 
