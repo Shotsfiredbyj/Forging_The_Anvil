@@ -2,7 +2,7 @@
 
 *Written by Annie, April 2026. For the engineer who starts building tomorrow.*
 
-**Status as of 2026-04-18:** Phase 0, Phase 0.5, Phase 1 + 2 core, and **Phase 3.1 (preview)** are COMPLETE. The PoC cleared the PROCEED threshold on both stacks (Next.js and Vite); primary model rotated to Qwen3.6-35B-A3B-FP8 after the head-to-head on the new stack. Preview is live end-to-end on elostirion — `https://{slug}-preview.coldanvil.com/` serves real projects through a Cloudflare tunnel. Detailed state lives in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Phase 3.2 orchestrator.**
+**Status as of 2026-04-18:** Phase 0, Phase 0.5, Phase 1 + 2 core, Phase 3.1 (preview), **and Phase 3.2 (orchestrator)** are COMPLETE. First full end-to-end build proven on elostirion against the real Gateway — 3-step plan, 217s, public URL served a real 3-page React SPA with a working API. Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: Annie-driven planning (option B) or Phase 4 conversation bridge.**
 
 ---
 
@@ -100,7 +100,7 @@ The template lives at `templates/vite-hono-mvp/` (replaces the removed `template
 | 6 | **Deployment** | NEW | `builder/deploy.py`. `fly deploy` against a per-project Fly.io app. Wildcard DNS `*.coldanvil.com` → Fly edge. Litestream config per app for continuous SQLite replication. | 2 days + 1 day infra setup |
 | 7 | **Portability** | DEFERRED | Zip project directory, serve as download. | 1 day |
 | 8 | **Memory** | EXISTING — sufficient for first slice | Project model already stores `extraction_state` and `conversation_history` as JSONB. Cross-session memory deferred. | 0 days (first slice) / 3 days (full) |
-| 9 | **Orchestrator** | NEW | `builder/orchestrator.py`. The loop that replaces the cascade. Reads extraction state, decomposes idea into a sequence of code-gen calls, executes step by step, reports progress. This is Annie's brain during the build phase. | 4 days |
+| 9 | **Orchestrator** | ✓ DONE 2026-04-18 | `builder/orchestrator.py`. Plan-driven build loop (Phase 3.2). Ships with hardcoded 3-step skeleton; Annie-driven planning is the next enhancement. | 4 days |
 | 10 | **Creative artefacts** | NEW — per `respec/07-creative-memory.md` | `builder/creative.py`. Drafts `docs/vision.md`, `docs/brand-voice.md`, `docs/content-strategy.md`, `docs/site-architecture.md` from conversation state. Runs eval-gate (rubrics already exist in the forge layer). Drives the Annie↔user review loop. Persists to `docs/`. Serves slices to the code-gen prompt assembler as the creative-brief block. | 4 days |
 
 ---
@@ -163,7 +163,7 @@ Phase 2.1 (codegen core) and Phase 2.2 (retry-with-stderr + rollback + backup mo
 ### Phase 3: Preview + Orchestrator (4 days, partially parallel with Phase 0.5)
 
 - **3.1** ✓ **COMPLETE 2026-04-18.** `builder/preview.py` + `builder/caddy.py` built, tested, deployed on elostirion. Per-project `npm run dev` subprocess on OS-assigned Vite + Hono ports, running as a POSIX process group. Caddy reverse proxy listens on :8000, routes by Host header to the right project. Named Cloudflare tunnel `coldanvil-preview` (tunnel ID `407b797d-2b42-4533-9e6c-6566c385ca41`) fronts Caddy. DNS `*.coldanvil.com` wildcard on free Universal SSL (hyphen-format slugs — deferred upgrade to `{slug}.preview.coldanvil.com` when revenue justifies Advanced Certificate Manager at $10/mo, per Arnor memory `cold_anvil_preview_url_deferred_acm_upgrade_2026-04-18`). Public URL `https://{slug}-preview.coldanvil.com/` verified end-to-end. Full deployment state in `Cold_Anvil/BUILDING.md`. (2 days estimated; delivered in 1 session.)
-- **3.2** Implement `builder/orchestrator.py`. The build loop: read extraction state → plan tasks → execute code-gen calls one by one → verify each → update preview → report to user. *Depends on Phase 2 core.* (3 days)
+- **3.2** ✓ **COMPLETE 2026-04-18.** `builder/orchestrator.py` + 15 unit tests. Plan-driven build loop: `codegen_with_retries` → preview refresh per success → tear-down on failure (Jack's rule: no broken output to users). Default plan is a hardcoded 3-step skeleton (option A per `cold_anvil_orchestrator_planning_roadmap_2026-04-18`). Option B (Annie-driven planning from extraction state) is the top post-3.2 priority. First end-to-end run on elostirion produced a real 3-page React SPA with working API in 217s. (3 days estimated; core + tests + e2e proof delivered in 1 session.)
 - **3.3** End-to-end: scaffold → orchestrate 3-page build → verify each step → confirm preview URL at `<slug>-preview.coldanvil.com` loads the current state.
 
 *3.1 ran in parallel with Phase 0.5 + Phase 2.5 as planned. 3.2 depends on Phase 2 core (done).*
