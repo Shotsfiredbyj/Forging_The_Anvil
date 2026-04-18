@@ -165,6 +165,27 @@ This contract is the fix for the Stage 4 → Stage 5 break. There is no Stage 4 
 
 ---
 
+## 9. User-facing language — no implementation detail leaks to the user
+
+Cold Anvil's users are laymen. Non-engineers bringing ideas, not builders picking frameworks. Any text that reaches them — plan descriptions, progress events, error messages, settings, onboarding copy, 404 pages, support UX, the marketing site — gets translated to user-experience language. Technical vocabulary never reaches the surface.
+
+**Concretely:**
+
+- **Plan descriptions** are "Your about page — explains who you are and what makes you different," not "landing_page → src/pages/Index.tsx."
+- **Progress events** are "Building your about page…," not "Step 2/3: FEATURE_PAGE."
+- **Errors** are "Something went wrong on the menu section — we stopped so we don't ship a broken site. Want me to try again?" — not raw stderr, not framework-specific jargon. Technical detail is logged server-side for debugging; the user sees what it means for them and what they can do about it.
+- **Technical tradeoffs** that genuinely need user input (rare) are phrased as user-experience questions. "Do visitors stay logged in between visits?" — not "stateless vs. session auth." If a question can't be phrased without jargon, the question is almost certainly an engineering call the user shouldn't be deciding — Annie makes the call and moves on.
+
+**How this is enforced mechanically:**
+
+Every Annie-produced artefact that has a user-facing surface carries two descriptions — one technical (for Annie's downstream tools: codegen, verify, preview) and one user-facing (for the chat, the plan display, the event stream, the docs panel). The planner writes both. Annie's the same model with the same project context writing both; it's one prompt call producing two fields, not two pipelines.
+
+The WebSocket event stream, the conversation UI, the four creative-artefact files the user edits, and every error surface are exclusively in user-facing language. The technical description is available in debug logs and the orchestrator's structured result; it is not emitted to the browser.
+
+**Applies product-wide.** This isn't a Phase 4 rule about the build stream — it shapes the marketing site, Annie's chat system prompt, onboarding, published preview 404 pages, the customer-facing support surface, any future Annie UI. When in doubt between a technically-precise phrasing and a friendly one, the friendly one wins.
+
+---
+
 *Companions: `05-eval-standalone.md` specifies the rubric-based quality layer as a sibling product. `07-creative-memory.md` specifies how creative artefacts persist as both Annie's memory substrate and user-owned deliverables.*
 
 *End of spec. Four pages. Every requirement traceable. No cascade. No stages. Annie and her tools, delivering a deployed URL to a non-technical founder who brought an idea.*
