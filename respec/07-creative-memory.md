@@ -239,7 +239,9 @@ Three realistic options. Only option A is built at MVP.
 
 ---
 
-## 13. Design system — the fifth artefact (added 2026-04-18)
+## 13. Project design — the fifth artefact (added 2026-04-18)
+
+*Naming note: "project design" throughout this section means design decisions for the user's project. Cold Anvil's own brand system ("our design system") is governed by `Cold_Anvil/BRAND.md` — a separate concept. See §13.§"Boundary" below.*
 
 *Added after Phase 3.2 shipped and Claude Design (Anthropic Labs, released 2026-04-17) surfaced a cleaner pattern for visual identity capture than the status quo. See Arnor memory entries for the decision chain.*
 
@@ -259,7 +261,7 @@ The fifth artefact (`docs/design.md`) is for the **user's project**. It is disti
 
 ### MVP production: curated presets
 
-Rather than Annie drafting bespoke design systems from scratch (too high-variance for MVP model capability), Cold Anvil ships with **~6 curated preset design systems**. The user picks one during discovery; the scaffold copies the preset to `docs/design.md`; from that point on it behaves like any other creative artefact — sliced into every codegen brief, editable in place, version-controlled.
+Rather than Annie drafting bespoke project designs from scratch (too high-variance for MVP model capability), Cold Anvil ships with **~6 curated project-design presets**. The user picks one during discovery; the scaffold copies the preset to `docs/design.md`; from that point on it behaves like any other creative artefact — sliced into every codegen brief, editable in place, version-controlled.
 
 Preset count + aesthetic direction is a taste call (named presets + vibes TBD). Stored at `Cold_Anvil/templates/design-presets/{slug}.md`, each a full `design.md` the user's project can inherit.
 
