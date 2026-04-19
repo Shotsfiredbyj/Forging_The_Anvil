@@ -50,8 +50,12 @@ from knowing.
 
 Hosted on Cloudflare Pages. Deploy with:
 ```
-cd Cold_Anvil && npx wrangler pages deploy site/ --project-name coldanvil --commit-dirty=true
+cd Cold_Anvil/site && npx wrangler pages deploy . --project-name coldanvil --branch main --commit-dirty=true
 ```
+
+**Run from inside `site/`.** Wrangler looks for `functions/` relative to the CWD, not inside the asset directory passed as an argument. Running from `Cold_Anvil/` will deploy the static assets but silently skip Pages Functions — no error, just no functions. The `coldanvil.com` Pages project uses Functions for the pre-launch gate and API endpoints, so skipping them breaks the site.
+
+`--branch main` makes the deploy production (pointed to by `coldanvil.com`). Omit it and you get a preview-only URL alias.
 
 Always commit and push to the Cold_Anvil repo before deploying.
 
