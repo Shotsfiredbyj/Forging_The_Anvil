@@ -57,6 +57,8 @@ cd Cold_Anvil/site && npx wrangler pages deploy . --project-name coldanvil --bra
 
 `--branch main` makes the deploy production (pointed to by `coldanvil.com`). Omit it and you get a preview-only URL alias.
 
+**Bindings and secrets live in the Cloudflare dashboard, not in `wrangler.toml`.** Pages uploads every file in the deploy directory as a public static asset — a `wrangler.toml` next to the HTML gets served at `coldanvil.com/wrangler.toml` with its bindings visible. Configure KV namespaces, D1 databases, and secrets at **Workers & Pages → coldanvil → Settings → Bindings / Variables and Secrets**. Bindings persist across deploys without needing to be re-applied.
+
 Always commit and push to the Cold_Anvil repo before deploying.
 
 ### Key References
