@@ -2,11 +2,17 @@
 
 *Written by Annie, April 2026. For the engineer who starts building tomorrow.*
 
-**Status as of 2026-04-18:** Phase 0, 0.5, 1, 2 core, 3.1 (preview), 3.2 (orchestrator), 3.4 (Option B — Annie-driven planning), Phase 4 (conversation bridge service layer), **Annie UI Phase 1 (auth + routing shell + home)**, and the design system + Annie app scaffold are COMPLETE at the code/test level. End-to-end build proven on elostirion. Planner proven on warm Qwen3.6. Design system (Bullfinch Forge palette + Newsreader/Inter + outlined cards + five custom brand glyphs) installed as a project-scoped Claude Code skill. Annie UI Phase 1 shipped with real API integration against the existing auth + projects endpoints.
+**Status as of 2026-04-19:** The full discovery → build flow is code-complete. Phases 0 through 4 done. **Annie UI Phases 1, 2, and 3 done** (auth shell + conversation + plan review + design picker + build stream). **IAM migrated to Logto** (task #52) and **hardened** (#53: CSRF double-submit, sliding-window rate limits, Turnstile verifier wired, prod cookie domain). **Design preset library wired end-to-end** (#38, #56, #57: six curated starts, scaffold copies user's pick into `docs/design.md`, creative briefs slice it into visual codegen tasks, discovery UI lets the user pick). **Deploy infra in the repo** (Dockerfile + fly.toml + .dockerignore + alembic env override for Fly.io + Neon Postgres). **Email templates + Postmark setup guide** drafted for task #54. **`auth-ui/` SPA partially polished** from the Logto BYO UI audit. **CI** running fast tests + both frontends on every push/PR.
 
-**IAM migration pivot 2026-04-18:** the existing `api/services/auth.py` hand-rolls OTP + JWT and stores tokens in localStorage. Jack's decade-plus IAM specialism + the obvious production risks (no refresh tokens, no rate limiting, no MFA, no audit log, XSS-exposed tokens) triggered a decision to migrate to Logto ahead of Annie UI Phase 2 + 3, so we don't double-write auth-state handling in every screen. Zero real users yet = zero migration cost. See `Cold_Anvil/BUILDING.md` and Arnor memory `cold_anvil_iam_logto_over_hand_rolled_2026-04-18`.
+**What remains, per `Cold_Anvil/BUILDING.md`:**
 
-Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md`. Companion document `respec/07-creative-memory.md` adds `builder/creative.py` and a first-class creative-brief input to every code-gen call; respec/03 §9 codifies the user-facing-language rule. Read `Cold_Anvil/BUILDING.md` and `respec/07-creative-memory.md` before opening any code. **Next up: IAM migration to Logto (task #52), then Annie UI Phase 2 + 3, then deploy the API so users can drive it end-to-end.**
+- **Ops cutover** — create Logto prod tenant, create Postmark account, provision Neon, first `fly deploy`. Guides for all three at `~/Desktop/{logto-prod-tenant-setup,postmark-setup,fly-deploy-setup}.md`. Finish + paste the handover values back and the rest is scripted.
+- **Task #55** — finish `auth-ui/` (punch list in `~/.claude/plans/logto-byo-ui-plan.md`), zip + upload to Logto.
+- **Task #39** — Stage 2 Annie-generated contextual design knobs on top of the chosen preset.
+- **Phase 2.5** — creative drafting + eval-gate layer (autogenerate vision/voice/content/architecture from conversation signal).
+- **Phase 5** — Fly.io per-project + Litestream deploy for user apps. Needs the `*.coldanvil.com` DNS conflict resolved.
+
+Primary model Qwen3.6-35B-A3B-FP8. Detailed state in `Cold_Anvil/BUILDING.md` — the source of truth for anything time-bounded in this plan.
 
 ---
 

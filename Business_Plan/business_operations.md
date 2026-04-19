@@ -50,16 +50,19 @@ Recorded 2026-04-18. Decision reasoning for IAM + payments lives in `Research/ia
 
 **Cold Anvil:**
 - `coldanvil.com` — marketing site (Cloudflare Pages)
-- `app.coldanvil.com` — authenticated product (Annie workspace)
-- `api.coldanvil.com` — Hono API
-- `auth.coldanvil.com` — Logto + magic-link sender domain
+- `app.coldanvil.com` — authenticated product (Annie workspace, Cloudflare Pages)
+- `api.coldanvil.com` — FastAPI backend (Fly.io, region ARN / Stockholm)
+- `*-preview.coldanvil.com` — live user-project previews (elostirion + cloudflared + Caddy)
+- `auth.coldanvil.com` — Logto (custom domain) + Postmark magic-link sender
 - `billing.coldanvil.com` — Stripe customer portal
 - `status.coldanvil.com` — status page
+
+*Note: `api.coldanvil.com` is Python + FastAPI, not Hono. Hono is the user-app backend framework inside the `vite-hono-mvp` template Annie scaffolds; `api.coldanvil.com` is Cold Anvil's own control-plane backend.*
 
 **Celyn (mirrors when it ships):**
 - `celyn.health` — marketing
 - `app.celyn.health` — product
-- `api.celyn.health` — Hono API (separate subdomain for clean tenant isolation)
+- `api.celyn.health` — FastAPI backend (separate subdomain for clean tenant isolation)
 - `auth.celyn.health` — Celyn-branded IAM chrome
 - `billing.celyn.health` — Stripe B2B portal
 
