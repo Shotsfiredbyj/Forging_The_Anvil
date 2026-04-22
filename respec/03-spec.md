@@ -186,6 +186,28 @@ The WebSocket event stream, the conversation UI, the four creative-artefact file
 
 ---
 
+## 10. The navigator/driver principle
+
+Every beat in §3 is a feedback loop. They are not decorations on the journey; they are the journey.
+
+**The user is the navigator.** They bring the idea, they tell Annie what they want, and they hold agency at every moment. Nothing Annie does can be final until the user says it is. The user can push back, redirect, correct, comment, or go a different way — not only at designated gates, but continuously, at every beat, including during an active build.
+
+**Annie is the driver who knows the terrain.** She applies product-development best practices. She has opinions. She commits to directions. But her authority is always subordinate to the user's intent. She does not carry the user; she drives for the user.
+
+**The funnel is semi-deterministic.** There is a shape — problem → customer → solution → plan → build → refine — and a direction of travel. But it cannot feel like a wizard or a form the user is being pushed through. Users who want to skip ahead should be able to. Users who want to go deeper should be able to. Users who want to change their minds halfway through should never feel like they're breaking something.
+
+This principle applies across every surface. Every user-facing element in Cold Anvil must be able to answer three questions:
+
+1. Where is the user's agency here?
+2. What does pushing back look like?
+3. What does "go a different way" look like?
+
+If any of the three has no answer, the surface isn't navigator-shaped yet.
+
+*(Traceability: clarification from Jack 2026-04-22 during the dogfood session that surfaced the §3 alignment gap. The whole point of the respec (§1 + §11) is to close the "pipeline wearing a persona" gap; the navigator/driver principle is the integrating statement of what closes it.)*
+
+---
+
 *Companions: `05-eval-standalone.md` specifies the rubric-based quality layer as a sibling product. `07-creative-memory.md` specifies how creative artefacts persist as both Annie's memory substrate and user-owned deliverables.*
 
 *End of spec. Four pages. Every requirement traceable. No cascade. No stages. Annie and her tools, delivering a deployed URL to a non-technical founder who brought an idea.*
