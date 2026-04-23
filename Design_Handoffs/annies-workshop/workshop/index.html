@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Annie's Workshop — design package</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0eee9; }
+    body { overscroll-behavior: none; }
+    /* keep cards from showing a light background through rounded corners */
+    .dc-card { background: var(--bg); overflow: hidden; }
+    /* artboard roots use wk-root for tokens */
+    .wk-root { width: 100%; height: 100%; overflow: hidden; }
+    /* little helpers on canvas */
+    .wk-scroll { overflow: auto; }
+    .wk-scroll::-webkit-scrollbar { display: none; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="sections/rationale.jsx"></script>
+  <script type="text/babel" src="sections/typography.jsx"></script>
+  <script type="text/babel" src="sections/motion.jsx"></script>
+  <script type="text/babel" src="sections/components.jsx"></script>
+  <script type="text/babel" src="sections/component-structural.jsx"></script>
+  <script type="text/babel" src="sections/states.jsx"></script>
+  <script type="text/babel" src="sections/first-session.jsx"></script>
+  <script type="text/babel" src="sections/ongoing.jsx"></script>
+  <script type="text/babel" src="sections/mobile.jsx"></script>
+  <script type="text/babel" src="sections/filmstrips.jsx"></script>
+  <script type="text/babel" src="sections/tablet.jsx"></script>
+
+  <script type="text/babel">
+    const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+    function App() {
+      return (
+        <DesignCanvas>
+          <DCSection id="rationale" title="Annie's Workshop" subtitle="A design package for Cold Anvil. Read the rationale card first — it names the one thing I'd defend in a feedback round.">
+            <DCArtboard id="rat-cover"   label="01 · Cover"           width={820} height={1100}><window.RationaleCover /></DCArtboard>
+            <DCArtboard id="rat-why"     label="02 · The one signature" width={820} height={1100}><window.RationaleSignature /></DCArtboard>
+            <DCArtboard id="rat-ia"      label="03 · IA + navigator" width={820} height={1100}><window.RationaleIA /></DCArtboard>
+            <DCArtboard id="rat-scope"   label="04 · What's here / what's next" width={820} height={1100}><window.RationaleScope /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="type" title="Typography" subtitle="Locked: Newsreader display + Inter body. A and C remain for reference — the final system propagates B across every other screen.">
+            <DCArtboard id="type-b" label="B · Newsreader display + Inter body — LOCKED" width={640} height={900}><window.TypePairingB /></DCArtboard>
+            <DCArtboard id="type-a" label="A · IBM Plex (not selected)"                   width={640} height={900}><window.TypePairingA /></DCArtboard>
+            <DCArtboard id="type-c" label="C · Fraunces + Source Serif (not selected)"    width={640} height={900}><window.TypePairingC /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="motion" title="Motion language" subtitle="Five named primitives. Every motion in the product is one of these.">
+            <DCArtboard id="motion-all" label="The five gestures" width={1240} height={700}><window.MotionLanguage /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="first-session" title="The first session" subtitle="Eight beats from §3 of the spec, in order. The arc from 'I typed an idea on coldanvil.com' to 'my waitlist is live.' Two of the screens also ship at 390px — Discovery (the conversation surface) and Plan (the signature) — to prove the system collapses honestly on mobile.">
+            <DCArtboard id="fs-01" label="01 · Arrival → Workshop" width={1440} height={900}><window.ScreenArrival /></DCArtboard>
+            <DCArtboard id="fs-01m" label="01 · Arrival — 390px mobile" width={460} height={880}><window.MobileScreenArrival /></DCArtboard>
+            <DCArtboard id="fs-02" label="02 · Discovery conversation" width={1440} height={900}><window.ScreenDiscovery /></DCArtboard>
+            <DCArtboard id="fs-02m" label="02 · Discovery — 390px mobile" width={460} height={880}><window.MobileScreenConversation /></DCArtboard>
+            <DCArtboard id="fs-03" label="03 · Vision artefact (a challengeable claim)" width={1440} height={900}><window.ScreenVision /></DCArtboard>
+            <DCArtboard id="fs-03m" label="03 · Vision — 390px mobile" width={460} height={880}><window.MobileScreenVision /></DCArtboard>
+            <DCArtboard id="fs-04" label="04 · The plan (the signature)" width={1440} height={900}><window.ScreenPlan /></DCArtboard>
+            <DCArtboard id="fs-04m" label="04 · The plan — 390px mobile" width={460} height={880}><window.MobileScreenPlan /></DCArtboard>
+            <DCArtboard id="fs-05" label="05 · Build with live preview" width={1440} height={900}><window.ScreenBuild /></DCArtboard>
+            <DCArtboard id="fs-05m" label="05 · Build — 390px mobile" width={460} height={880}><window.MobileScreenBuild /></DCArtboard>
+            <DCArtboard id="fs-06" label="06 · Refinement — click to edit" width={1440} height={900}><window.ScreenRefine /></DCArtboard>
+            <DCArtboard id="fs-06m" label="06 · Refine — 390px mobile" width={460} height={880}><window.MobileScreenRefine /></DCArtboard>
+            <DCArtboard id="fs-07" label="07 · Publishing" width={1440} height={900}><window.ScreenPublish /></DCArtboard>
+            <DCArtboard id="fs-07m" label="07 · Publishing — 390px mobile" width={460} height={880}><window.MobileScreenPublish /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="ongoing" title="The ongoing relationship" subtitle="Returning users. Annie remembers. The project deepens. Operator mode narrates what broke while they were gone. Mobile adapts the two-column layout to a stacked, Annie-led feed.">
+            <DCArtboard id="og-home"     label="08 · Project home (returning)" width={1440} height={900}><window.ScreenProjectHome /></DCArtboard>
+            <DCArtboard id="og-home-m"   label="08 · Project home — 390px mobile" width={460} height={880}><window.MobileScreenHome /></DCArtboard>
+            <DCArtboard id="og-operator" label="09 · Annie-as-operator update" width={1440} height={900}><window.ScreenOperator /></DCArtboard>
+            <DCArtboard id="og-operator-m" label="09 · Operator — 390px mobile" width={460} height={880}><window.MobileScreenOperator /></DCArtboard>
+            <DCArtboard id="og-artefact" label="10 · The four artefacts, browsable" width={1440} height={900}><window.ScreenArtefacts /></DCArtboard>
+            <DCArtboard id="og-artefact-m" label="10 · Artefacts — 390px mobile" width={460} height={880}><window.MobileScreenArtefacts /></DCArtboard>
+            <DCArtboard id="og-history"  label="11 · The project ledger" width={1440} height={900}><window.ScreenLedger /></DCArtboard>
+            <DCArtboard id="og-history-m" label="11 · Ledger — 390px mobile" width={460} height={880}><window.MobileScreenLedger /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="mobile-edges" title="Mobile edge states" subtitle="The three states that only matter on mobile — offline, publish-failed, reconnection. Banners, never alerts.">
+            <DCArtboard id="edge-states" label="Offline · Publish failed · Reconnection" width={1480} height={1060}><window.MobileEdgeStates /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="filmstrips" title="Interaction filmstrips" subtitle="Five moments where the product lives or dies. Stills show what a screen is; filmstrips show what a screen does.">
+            <DCArtboard id="film-all" label="Challenge · Point · Strike · Operator · Resume" width={1560} height={2400}><window.FilmstripsSection /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="responsive" title="Responsive system" subtitle="Three breakpoints. The conversation is load-bearing; everything else adapts around it. One tablet worked example next to the rule card.">
+            <DCArtboard id="tablet-build" label="Tablet worked example — Build+Preview, 900×1280" width={980} height={1260}><window.TabletBuildScreen /></DCArtboard>
+            <DCArtboard id="breakpoints" label="Breakpoint rules" width={1040} height={900}><window.BreakpointRules /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="states" title="State library" subtitle="Empty, loading, mid-build, failure-with-rollback, reconnection, publishing, deployed. In Annie's voice. §9-compliant.">
+            <DCArtboard id="state-grid" label="All states" width={1440} height={1100}><window.StateLibrary /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="components" title="Component spec" subtitle="Every atom that shows up in the screens above. Buttons, inputs, chips, Annie lines, the plan card, the claim underline, browser chrome, ledger, message composer.">
+            <DCArtboard id="comp-spec" label="Component spec" width={1440} height={1400}><window.ComponentSpec /></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
