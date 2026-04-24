@@ -24,7 +24,7 @@ product specs, and the Cold_Anvil codebase.
 - `Research/` — Market research, competitor analysis, discovery
 - `Business_Plan/` — Business model, financials, strategy, pricing
 - `Product_Specs/` — Feature specs, user journeys, commission briefs
-- `Design_Handoffs/` — Design handoffs from Claude Design. Workshop handoff (Apr 2026) is the authoritative spec for Annie UI implementation.
+- `Design_Handoffs/` — Design handoffs from Claude Design. Workshop handoff (Apr 23 2026) is the authoritative spec for Annie UI implementation; marketing-site handoff (Apr 24 2026) is the authoritative spec for `coldanvil.com` refresh — includes the Live Hand composer signature moment.
 - `respec/` — The product respec (01-journey through 07-creative-memory). 03-spec.md is THE spec.
 
 **Important:** `Cold_Anvil/` is its own git repo. Commits and pushes there are
@@ -71,8 +71,9 @@ Always commit and push to the Cold_Anvil repo before deploying.
 - `respec/04-consolidation.md` — record of what was archived and why.
 - `Cold_Anvil/CLAUDE.md` — codebase-specific working rules.
 - `Design_Handoffs/annies-workshop/` — **Claude Design handoff for Annie's Workshop** (delivered 2026-04-23). Authoritative spec for UI implementation. `tokens.css` is the unified CSS source of truth. `README.md` has the full design spec + architectural invariants.
+- `Design_Handoffs/marketing-site/` — **Claude Design handoff for the marketing site** (delivered 2026-04-24). Authoritative spec for `coldanvil.com` refresh. Home C (canonical), About, Pricing (layout-only, blocked on tier model), Waitlist (styling-only refresh), handoff crossing, states, mobile variants. Signature moment: the **Live Hand** — home hero composer wired through our own Gateway (not Anthropic), 3–4 sentence Annie reply to cold visitors. One new motion token (`draw`) ported into BRAND.md.
 - `Product_Specs/claude-design-commission-brief.md` — the brief we sent for the workshop (now closed, handoff delivered).
-- `Product_Specs/claude-design-commission-brief-marketing.md` — draft brief for the marketing-site sibling commission (2026-04-23, not yet sent).
+- `Product_Specs/claude-design-commission-brief-marketing.md` — the brief we sent for the marketing site (delivered 2026-04-24).
 - `Business_Plan/business_plan.md` — pricing, costs, go-to-market (still current).
 - `BACKGROUND-AND-VISION.md` — origin story, The Forge lineage, long-term vision (still current).
 - `Research/` — the learnings that shaped the respec; evidence only, not directives.

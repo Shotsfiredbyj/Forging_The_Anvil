@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cold Anvil marketing — design package</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0eee9; }
+    body { overscroll-behavior: none; }
+    .dc-card { background: var(--bg); overflow: hidden; }
+    .wk-root { width: 100%; height: 100%; overflow: hidden; }
+    .wk-scroll { overflow: auto; }
+    .wk-scroll::-webkit-scrollbar { display: none; }
+    /* marketing atoms live alongside wk-* */
+    .mk-root { width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--ink); font-family:var(--font-body-b); }
+    .mk-scroll { overflow:auto; height:100%; }
+    .mk-scroll::-webkit-scrollbar { display: none; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="mk-primitives.jsx"></script>
+  <script type="text/babel" src="sections/_stubs.jsx"></script>
+  <script type="text/babel" src="sections/rationale.jsx"></script>
+  <script type="text/babel" src="sections/signature.jsx"></script>
+  <script type="text/babel" src="sections/home.jsx"></script>
+  <script type="text/babel" src="sections/about.jsx"></script>
+  <script type="text/babel" src="sections/pricing.jsx"></script>
+  <script type="text/babel" src="sections/waitlist.jsx"></script>
+  <script type="text/babel" src="sections/handoff.jsx"></script>
+  <script type="text/babel" src="sections/states.jsx"></script>
+  <script type="text/babel" src="sections/components.jsx"></script>
+  <script type="text/babel" src="sections/motion.jsx"></script>
+  <script type="text/babel" src="sections/mobile.jsx"></script>
+
+  <script type="text/babel">
+    const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+    function App() {
+      return (
+        <DesignCanvas>
+          <DCSection id="rationale" title="Cold Anvil marketing" subtitle="The sibling package to Annie's Workshop. Read the rationale cards first — they name the signature moment, the one thing I'd defend, and the continuity with the workshop.">
+            <DCArtboard id="rat-cover"     label="01 · Cover"                     width={820} height={1100}><window.MkRationaleCover /></DCArtboard>
+            <DCArtboard id="rat-signature" label="02 · The signature — Live Hand" width={820} height={1100}><window.MkRationaleSignature /></DCArtboard>
+            <DCArtboard id="rat-ia"        label="03 · Pages + rhythm"            width={820} height={1100}><window.MkRationaleIA /></DCArtboard>
+            <DCArtboard id="rat-continuity" label="04 · Continuity with the workshop" width={820} height={1100}><window.MkRationaleContinuity /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="signature" title="The signature moment — the Live Hand" subtitle="Marketing's equivalent to the plan-as-stamp. The home-page composer is not a demo: Annie actually replies to a cold visitor, right on the page. A workshop window sits behind it — documentary, quiet, restrained. The two together are the signature.">
+            <DCArtboard id="sig-demo" label="Live Hand — working prototype (talks to Annie for real)" width={1280} height={820}><window.MkSignatureLiveHand /></DCArtboard>
+            <DCArtboard id="sig-anatomy" label="Anatomy — what the signature is made of" width={1280} height={820}><window.MkSignatureAnatomy /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="home" title="Home — the canonical page" subtitle="Variant C — the home we're shipping. A synthesis: the warm two-tone wash carrying the composer inside the hero, documentary ambient tape below, contained cream + mustard pockets, sticky 'Talk to Annie' pill. Desktop + 390px mobile. Earlier variants A & B are preserved in the archive at the bottom of the canvas.">
+            <DCArtboard id="home-c" label="Home · 1440 desktop (canonical)" width={1440} height={4700}><window.MkHomeC /></DCArtboard>
+            <DCArtboard id="home-c-m" label="Home · 390px mobile" width={460} height={3200}><window.MkHomeCMobile /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="handoff" title="The crossing — marketing → workshop" subtitle="The visitor types an idea and submits. What happens before the workshop takes over? Three options, paired to the home variants.">
+            <DCArtboard id="handoff-options" label="Three handoff options, compared" width={1480} height={1000}><window.MkHandoffOptions /></DCArtboard>
+            <DCArtboard id="handoff-film" label="Filmstrip — the chosen crossing (threshold)" width={1480} height={720}><window.MkHandoffFilmstrip /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="about" title="About — the studio story" subtitle="Current copy kept; re-shaped around section rhythm from the workshop system. One cream pocket. Ledger of what came out of the workshop (real projects, not 'customer logos'). Nothing new invented for the sake of it.">
+            <DCArtboard id="about" label="About · 1440 desktop" width={1440} height={3800}><window.MkAbout /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="pricing" title="Pricing — the canonical page" subtitle="Variant A — the clean outlined grid. Four tiers (Tier 0 to Tier 3), monthly/annual toggle, &quot;Regular&quot; takes the accent, &quot;what's the same at every plan&quot; strip underneath. ⚠ Tier names and prices are ILLUSTRATIVE placeholders only — final names, numbers, and all marketing copy TBD. Variant B preserved in the archive.">
+            <DCArtboard id="pricing-a" label="Pricing · 1440 desktop (canonical)" width={1440} height={2600}><window.MkPricingA /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="waitlist" title="The waitlist — the canonical page" subtitle="Variant C — the peek. Modeled on the live coldanvil.com holding page: left-biased editorial text, a tilted browser bleeding off the right edge. The teaser sells the product; the copy just sets the terms. Mobile brings the teaser upright between form and footer. Earlier &quot;letter&quot; and &quot;Annie's not in&quot; variants preserved in the archive.">
+            <DCArtboard id="waitlist-c" label="Waitlist · 1440 desktop (canonical)" width={1440} height={1200}><window.MkWaitlistC /></DCArtboard>
+            <DCArtboard id="waitlist-m" label="Waitlist · 390px mobile" width={460} height={1400}><window.MkWaitlistMobile /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="states" title="Load-bearing states" subtitle="Not all four from the brief — only the ones that carry weight pre-launch: waitlist success, waitlist error, the 404, and the handoff-in-progress overlay.">
+            <DCArtboard id="states" label="Waitlist success · error · 404 · handoff-loading" width={1480} height={1000}><window.MkStates /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="components" title="Marketing-only components" subtitle="Everything that isn't already in the workshop handoff. Reused where possible; new where the marketing rhythm demanded.">
+            <DCArtboard id="components" label="Pricing tier · Trust row · Ledger row · Sticky talk · Nav · Footer" width={1480} height={1800}><window.MkComponents /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="motion" title="Motion application on marketing" subtitle="Workshop's five gestures — arrive, settle, warm, point, emerge — are inherited as-is. Marketing uses four of them, plus one new sibling: 'draw' (the scroll-in of editorial rules).">
+            <DCArtboard id="motion" label="Five inherited + one new" width={1280} height={700}><window.MkMotion /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="archive" title="Archive — earlier variants" subtitle="Retired but preserved. Home A (editorial + composer) and Home B (full-bleed workshop window) were the two ends of the trade-off C now synthesizes. Pricing B (signature pockets) was the louder alternative to A's restraint. Waitlist A (the letter) and Waitlist B (Annie's not in yet) were the two poles before we chose the 'peek' pattern from the live holding page. Here so the arguments that produced C stay on the record.">
+            <DCArtboard id="home-a-archive"       label="RETIRED · Home A — Editorial + Live composer"         width={1440} height={4600}><window.MkHomeA /></DCArtboard>
+            <DCArtboard id="home-b-archive"       label="RETIRED · Home B — Workshop window + Ambient demo"    width={1440} height={4600}><window.MkHomeB /></DCArtboard>
+            <DCArtboard id="home-a-m-archive"     label="RETIRED · Home A — 390px mobile"                      width={460}  height={2200}><window.MkHomeAMobile /></DCArtboard>
+            <DCArtboard id="pricing-b-archive"    label="RETIRED · Pricing B — Grid + signature pockets"       width={1440} height={3000}><window.MkPricingB /></DCArtboard>
+            <DCArtboard id="waitlist-a-archive"   label="RETIRED · Waitlist A — The letter"                    width={1440} height={1000}><window.MkWaitlistA /></DCArtboard>
+            <DCArtboard id="waitlist-b-archive"   label="RETIRED · Waitlist B — Annie's not in yet"            width={1440} height={1100}><window.MkWaitlistB /></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
