@@ -1,0 +1,255 @@
+/* =========================================================================
+   Cold Anvil Studios — Colors & Type Tokens
+   Palette: Bullfinch Forge (Gruvbox Bullfinch core + curated extensions)
+   Type:    Newsreader (editorial serif) + Inter (utility sans)
+   ========================================================================= */
+
+/* Newsreader + Inter are self-hosted variable fonts from ../fonts/.
+   JetBrains Mono still served from Google Fonts (code/system only). */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@font-face {
+  font-family: 'Newsreader';
+  src: url('fonts/Newsreader_opsz_wght_.ttf') format('truetype-variations'),
+       url('fonts/Newsreader_opsz_wght_.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader';
+  src: url('fonts/Newsreader-Italic_opsz_wght_.ttf') format('truetype-variations'),
+       url('fonts/Newsreader-Italic_opsz_wght_.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/InterVariable.ttf') format('truetype-variations'),
+       url('fonts/InterVariable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/InterVariable-Italic.ttf') format('truetype-variations'),
+       url('fonts/InterVariable-Italic.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* ---------- BASE COLOR SCALE (raw hex) ---------- */
+  --ca-bg0s:        #32302f; /* Gruvbox bg0_s — page background (Bullfinch core) */
+  --ca-bg1:         #3c3836; /* Gruvbox bg1 — secondary surface */
+  --ca-bg2:         #4b4441; /* Lifted elevation (Bullfinch extension) */
+  --ca-bg3:         #504945; /* Gruvbox bg2 — card surface (legacy) */
+  --ca-bg4:         #665c54; /* Gruvbox bg3 — strong lift */
+  --ca-bg5:         #7c6f64; /* Gruvbox bg4 — heaviest lift */
+
+  --ca-gray:        #928374; /* Gruvbox gray-245 — borders, muted text */
+  --ca-gray-light:  #a89984; /* Gruvbox gray-246 — secondary text */
+
+  --ca-fg0:         #fbf1c7; /* Gruvbox fg0 — cream (contrast pocket) */
+  --ca-fg1:         #ebdbb2; /* Gruvbox fg1 — bright text */
+  --ca-fg2:         #d5c4a1; /* Gruvbox fg2 — supporting text */
+  --ca-ink:         #d4be9a; /* Bullfinch core body ink */
+
+  --ca-mustard:     #d8a65c; /* Bullfinch accent — CTAs, manifesto */
+  --ca-olive:       #8c945c; /* Secondary — non-text UI only */
+  --ca-red:         #fb4934; /* Error (Gruvbox bright red) */
+  --ca-green:       #b8bb26; /* Success (Gruvbox bright green) */
+  --ca-yellow:      #fabd2f; /* Warning (Gruvbox bright yellow) */
+
+  /* ---------- SEMANTIC COLOR TOKENS ---------- */
+  --bg:             var(--ca-bg0s);
+  --bg-elevated:    var(--ca-bg2);
+  --bg-surface:     var(--ca-bg1);
+
+  --ink:            var(--ca-ink);           /* body on page bg — 7.27:1 AAA */
+  --ink-bright:     var(--ca-fg1);           /* body on lifted surfaces — 9.57:1 AAA */
+  --ink-muted:      var(--ca-gray-light);    /* captions, secondary */
+  --ink-dim:        var(--ca-gray);          /* tertiary, dividers text */
+  --ink-on-light:   var(--ca-bg0s);          /* body on cream / mustard */
+
+  --accent:         var(--ca-mustard);       /* primary accent — 5.96:1 */
+  --accent-on:      var(--ca-bg0s);          /* text on accent */
+  --secondary:      var(--ca-olive);         /* non-text ui (dots, badges) */
+
+  --border:         var(--ca-gray);          /* visible card border — 3.58:1 */
+  --border-subtle:  var(--ca-bg2);           /* internal dividers */
+
+  --cream:          var(--ca-fg0);           /* cream spread pocket */
+  --mustard:        var(--ca-mustard);       /* mustard manifesto pocket */
+
+  --status-success: var(--ca-green);
+  --status-warn:    var(--ca-yellow);
+  --status-error:   var(--ca-red);
+
+  /* ---------- TYPE FACES ---------- */
+  --font-serif:     "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans:      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:      "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* ---------- TYPE SCALE (major-third 1.25, screen-adjusted) ---------- */
+  /* Role            size / line-height / weight / face */
+  --display-size:    76px;  --display-lh:    1.05;  --display-weight:  500;
+  --h1-size:         56px;  --h1-lh:         1.10;  --h1-weight:       500;
+  --h2-size:         44px;  --h2-lh:         1.15;  --h2-weight:       500;
+  --h3-size:         24px;  --h3-lh:         1.25;  --h3-weight:       500;
+  --lead-size:       22px;  --lead-lh:       1.55;  --lead-weight:     400;
+  --body-lg-size:    19px;  --body-lg-lh:    1.58;  --body-lg-weight:  400;
+  --body-size:       17px;  --body-lh:       1.65;  --body-weight:     400;
+  --body-sm-size:    16px;  --body-sm-lh:    1.63;  --body-sm-weight:  400;
+  --ui-size:         15px;  --ui-lh:         1.47;  --ui-weight:       500;
+  --ui-sm-size:      14px;  --ui-sm-lh:      1.43;  --ui-sm-weight:    500;
+  --eyebrow-size:    13px;  --eyebrow-lh:    1.38;  --eyebrow-weight:  500;
+  --caption-size:    13px;  --caption-lh:    1.38;  --caption-weight:  400;
+  --code-size:       14px;  --code-lh:       1.57;  --code-weight:     400;
+
+  --eyebrow-tracking:  0.14em;
+
+  /* ---------- SPACING (4px base) ---------- */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   24px;
+  --space-6:   32px;
+  --space-7:   48px;
+  --space-8:   64px;
+  --space-9:   96px;
+  --space-10:  144px;
+
+  /* ---------- RADII ---------- */
+  --radius-xs:  3px;
+  --radius-sm:  4px;
+  --radius-md:  6px;   /* buttons */
+  --radius-lg:  8px;   /* cards */
+  --radius-xl:  12px;
+
+  /* ---------- BORDERS ---------- */
+  --border-width: 1px;
+  --border-width-emphasis: 1px; /* accent card — still thin */
+
+  /* ---------- MOTION ---------- */
+  --easing:      cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast:    120ms;
+  --dur-base:    180ms;
+  --dur-slow:    280ms;
+
+  /* ---------- FOCUS ---------- */
+  --focus-ring:  0 0 0 2px var(--accent);
+
+  /* ---------- LAYOUT ---------- */
+  --content-max:  1100px;
+  --gutter:       32px;
+}
+
+/* =========================================================================
+   SEMANTIC TYPE ROLES — apply with class names
+   ========================================================================= */
+
+.t-display {
+  font-family: var(--font-serif);
+  font-size: var(--display-size);
+  line-height: var(--display-lh);
+  font-weight: var(--display-weight);
+  letter-spacing: -0.02em;
+}
+.t-h1 {
+  font-family: var(--font-serif);
+  font-size: var(--h1-size);
+  line-height: var(--h1-lh);
+  font-weight: var(--h1-weight);
+  letter-spacing: -0.018em;
+}
+.t-h2 {
+  font-family: var(--font-serif);
+  font-size: var(--h2-size);
+  line-height: var(--h2-lh);
+  font-weight: var(--h2-weight);
+  letter-spacing: -0.015em;
+}
+.t-h3 {
+  font-family: var(--font-serif);
+  font-size: var(--h3-size);
+  line-height: var(--h3-lh);
+  font-weight: var(--h3-weight);
+  letter-spacing: -0.008em;
+}
+.t-lead {
+  font-family: var(--font-serif);
+  font-size: var(--lead-size);
+  line-height: var(--lead-lh);
+  font-weight: var(--lead-weight);
+}
+.t-body-lg {
+  font-family: var(--font-serif);
+  font-size: var(--body-lg-size);
+  line-height: var(--body-lg-lh);
+}
+.t-body {
+  font-family: var(--font-serif);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+}
+.t-body-sm {
+  font-family: var(--font-serif);
+  font-size: var(--body-sm-size);
+  line-height: var(--body-sm-lh);
+}
+.t-ui {
+  font-family: var(--font-sans);
+  font-size: var(--ui-size);
+  line-height: var(--ui-lh);
+  font-weight: var(--ui-weight);
+}
+.t-ui-sm {
+  font-family: var(--font-sans);
+  font-size: var(--ui-sm-size);
+  line-height: var(--ui-sm-lh);
+  font-weight: var(--ui-sm-weight);
+}
+.t-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--eyebrow-size);
+  line-height: var(--eyebrow-lh);
+  font-weight: var(--eyebrow-weight);
+  text-transform: uppercase;
+  letter-spacing: var(--eyebrow-tracking);
+  color: var(--ink-muted);
+}
+.t-caption {
+  font-family: var(--font-sans);
+  font-size: var(--caption-size);
+  line-height: var(--caption-lh);
+  color: var(--ink-muted);
+}
+.t-code {
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-lh);
+}
+
+/* =========================================================================
+   BASE ELEMENT DEFAULTS (opt-in: apply .ca-base to the root)
+   ========================================================================= */
+
+.ca-base {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  -webkit-font-smoothing: antialiased;
+}
+.ca-base h1 { font: var(--h1-weight) var(--h1-size)/var(--h1-lh) var(--font-serif); letter-spacing: -0.018em; }
+.ca-base h2 { font: var(--h2-weight) var(--h2-size)/var(--h2-lh) var(--font-serif); letter-spacing: -0.015em; }
+.ca-base h3 { font: var(--h3-weight) var(--h3-size)/var(--h3-lh) var(--font-serif); }
+.ca-base p  { font: var(--body-weight) var(--body-size)/var(--body-lh) var(--font-serif); }
+.ca-base code,
+.ca-base pre { font-family: var(--font-mono); font-size: var(--code-size); }
