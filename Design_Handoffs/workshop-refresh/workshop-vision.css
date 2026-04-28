@@ -1,0 +1,147 @@
+/* =========================================================================
+   Vision tab styles — product brief document + preview rail
+   ========================================================================= */
+
+/* ── Document scroll area ── */
+.vA-vision-doc {
+  flex: 1; min-height: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 0 22px 22px;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+/* ── Banner at top ── */
+.vA-vision-banner {
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  background: rgba(216, 166, 92, 0.06);
+  border: 1px dashed rgba(216, 166, 92, 0.3);
+  border-radius: 6px;
+}
+.vA-vision-banner-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #d8a65c; margin-bottom: 4px;
+}
+.vA-vision-banner-sub {
+  font-family: var(--font-sans);
+  font-size: 12.5px; color: #a89984; line-height: 1.5;
+}
+
+/* ── Section ── */
+.vA-vision-section {
+  margin-bottom: 20px;
+}
+.vA-vision-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: #d8a65c;
+  padding: 0 0 8px 32px;
+  border-bottom: 1px solid #3c3836;
+  margin-bottom: 10px;
+}
+
+/* ── Commentable paragraph ── */
+.vA-vision-para {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-radius: 4px;
+  transition: background 180ms ease;
+}
+.vA-vision-para:hover {
+  background: rgba(216, 166, 92, 0.04);
+}
+.vA-vision-para .gutter {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 3px;
+}
+.vA-vision-para .comment-btn {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+  color: transparent;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+.vA-vision-para:hover .comment-btn {
+  color: #d8a65c;
+  border-color: rgba(216, 166, 92, 0.4);
+}
+.vA-vision-para:hover .comment-btn:hover {
+  background: rgba(216, 166, 92, 0.15);
+  border-color: #d8a65c;
+}
+.vA-vision-para .text {
+  font-family: var(--font-sans);
+  font-size: 13px; line-height: 1.6;
+  color: #d4be9a;
+}
+.vA-vision-para .text em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: #fbf1c7;
+}
+.vA-vision-para .text b {
+  font-weight: 600;
+  color: #ebdbb2;
+}
+
+/* ── Help icon (?) ── */
+.vA-vision-help {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid #6a625c;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+  color: #6a625c;
+  cursor: help;
+  transition: all 180ms ease;
+}
+.vA-vision-help:hover {
+  border-color: #d8a65c;
+  color: #d8a65c;
+}
+
+/* ── Vision preview rail body ── */
+.vA-vision-rail-body {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.vA-vr-card {
+  padding: 12px 14px;
+  background: #1c1a18;
+  border: 1px solid #3c3836;
+  border-radius: 6px;
+}
+.vA-vr-card.accent {
+  border-color: rgba(216, 166, 92, 0.35);
+  background: rgba(216, 166, 92, 0.04);
+}
+.vA-vr-label {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #6a625c; margin-bottom: 6px;
+}
+.vA-vr-card.accent .vA-vr-label { color: #d8a65c; }
+.vA-vr-text {
+  font-family: var(--font-serif);
+  font-size: 13px; line-height: 1.5;
+  color: #d4be9a;
+  font-style: italic;
+}
+.vA-vr-card.accent .vA-vr-text { color: #fbf1c7; }
+.vA-vr-stamp {
+  margin-top: auto;
+  padding: 10px 0;
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #6a625c;
+}
+.vA-vr-stamp .anvil { display: flex; }
